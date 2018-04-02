@@ -28,7 +28,7 @@ Pkg.add("KrigingEstimators")
 
 This package is part of the [GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
 
-For a simple example of usage, please check [this notebook](docs/Usage.ipynb).
+For examples of usage, please check the main documentation.
 
 ## Asking for help
 
