@@ -50,7 +50,7 @@
         plot(plt1, plt2, size=(600,800), layout=(2,1))
         png(fname)
       end
-      refimg = joinpath(datadir,"TheoreticalVariograms.png")
+      refimg = joinpath(datadir,"Variograms.png")
       @test test_images(VisualTest(plot_variograms, refimg), popup=!istravis) |> success
     end
   end
