@@ -4,7 +4,7 @@
 
 This package provides high-performance implementations of Kriging estimators introduced by
 [Matheron 1971](https://books.google.com/books/about/The_Theory_of_Regionalized_Variables_and.html?id=TGhGAAAAYAAJ),
-and developed by many other geostatisticians. As the most general form of estimation with covariance/variogram
+and further developed by various geostatisticians. As the most general form of estimation with covariance/variogram
 models, Kriging does **not** require distributional assumptions, is well-defined in general Hilbert spaces, and is
 unbiased. These properties make Kriging a quite useful method for estimation with real world data.
 Currently, the following Kriging variants are implemented:
