@@ -30,7 +30,8 @@ For examples of usage, please check the main documentation.
 
 ## Asking for help
 
-If you have any questions, please [open an issue](https://github.com/juliohm/KrigingEstimators.jl/issues).
+If you have any questions, please [open an issue](https://github.com/juliohm/KrigingEstimators.jl/issues)
+or contact our community on the [gitter channel](https://gitter.im/JuliaEarth/GeoStats.jl).
 
 [travis-img]: https://travis-ci.org/juliohm/KrigingEstimators.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/KrigingEstimators.jl
