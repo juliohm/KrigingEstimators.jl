@@ -41,6 +41,7 @@ export
   pairwise,
 
   # estimators
+  KrigingEstimator,
   SimpleKriging,
   OrdinaryKriging,
   UniversalKriging,

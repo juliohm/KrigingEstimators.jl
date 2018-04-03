@@ -18,7 +18,7 @@
 * [`OrdinaryKriging`](@ref) is recovered for 0th degree polynomial
 * For non-polynomial mean, see [`ExternalDriftKriging`](@ref)
 """
-mutable struct UniversalKriging{T<:Real,V} <: AbstractEstimator
+mutable struct UniversalKriging{T<:Real,V} <: KrigingEstimator
   # input fields
   γ::AbstractVariogram
   degree::Int

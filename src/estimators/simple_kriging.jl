@@ -17,7 +17,7 @@
 
 * Simple Kriging requires stationary variograms
 """
-mutable struct SimpleKriging{T<:Real,V} <: AbstractEstimator
+mutable struct SimpleKriging{T<:Real,V} <: KrigingEstimator
   # input fields
   γ::AbstractVariogram
   μ::V

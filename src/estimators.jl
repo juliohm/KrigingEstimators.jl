@@ -4,11 +4,11 @@
 # ------------------------------------------------------------------
 
 """
-    AbstractEstimator
+    KrigingEstimator
 
 A Kriging estimator (e.g. Simple Kriging).
 """
-abstract type AbstractEstimator end
+abstract type KrigingEstimator end
 
 """
     fit!(estimator, X, z)
@@ -16,7 +16,7 @@ abstract type AbstractEstimator end
 Build LHS of Kriging system from coordinates `X` with
 values `z` and save factorization in `estimator`.
 """
-function fit!(estimator::AbstractEstimator, X::AbstractMatrix, z::AbstractVector)
+function fit!(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
   # update data
   estimator.X = X
   estimator.z = z
@@ -37,7 +37,7 @@ end
 
 Compute mean and variance for the `estimator` at coordinates `xₒ`.
 """
-estimate(estimator::AbstractEstimator, xₒ::AbstractVector) =
+estimate(estimator::KrigingEstimator, xₒ::AbstractVector) =
   combine(estimator, weights(estimator, xₒ), estimator.z)
 
 """
@@ -46,7 +46,7 @@ estimate(estimator::AbstractEstimator, xₒ::AbstractVector) =
 Compute the weights λ (and Lagrange multipliers ν) for the
 `estimator` at coordinates `xₒ`.
 """
-function weights(estimator::AbstractEstimator, xₒ::AbstractVector)
+function weights(estimator::KrigingEstimator, xₒ::AbstractVector)
   nobs = size(estimator.X, 2)
 
   # build RHS
@@ -64,7 +64,7 @@ end
 
 Set LHS of Kriging system.
 """
-function set_lhs!(estimator::AbstractEstimator)
+function set_lhs!(estimator::KrigingEstimator)
   X = estimator.X; γ = estimator.γ
 
   # LHS variogram/covariance
@@ -78,7 +78,7 @@ end
 
 Set RHS of Kriging system at coodinates `xₒ`.
 """
-function set_rhs!(estimator::AbstractEstimator, xₒ::AbstractVector)
+function set_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector)
   X = estimator.X; γ = estimator.γ
 
   # RHS variogram/covariance
@@ -96,14 +96,14 @@ end
 
 Add constraints to LHS of Kriging system.
 """
-add_constraints_lhs!(estimator::AbstractEstimator, Γ::AbstractMatrix) = error("not implemented")
+add_constraints_lhs!(estimator::KrigingEstimator, Γ::AbstractMatrix) = error("not implemented")
 
 """
     add_constraints_rhs!(estimator, xₒ)
 
 Add constraints to RHS of Kriging system.
 """
-add_constraints_rhs!(estimator::AbstractEstimator, xₒ::AbstractVector) = error("not implemented")
+add_constraints_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector) = error("not implemented")
 
 """
     Weights(λ, ν)
@@ -120,7 +120,7 @@ end
 
 Combine `weights` with values `z` to produce mean and variance.
 """
-function combine(estimator::AbstractEstimator, weights::Weights, z::AbstractVector)
+function combine(estimator::KrigingEstimator, weights::Weights, z::AbstractVector)
   γ = estimator.γ
   b = estimator.RHS
   λ = weights.λ

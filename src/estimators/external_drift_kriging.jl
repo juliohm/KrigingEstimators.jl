@@ -21,7 +21,7 @@
 * [`OrdinaryKriging`](@ref) is recovered for `drifts = [x->1]`
 * For polynomial mean, see [`UniversalKriging`](@ref)
 """
-mutable struct ExternalDriftKriging{T<:Real,V} <: AbstractEstimator
+mutable struct ExternalDriftKriging{T<:Real,V} <: KrigingEstimator
   # input fields
   γ::AbstractVariogram
   drifts::Vector{Function}
