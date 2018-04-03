@@ -3,17 +3,15 @@
 [![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url]
 
 This package provides high-performance implementations of Kriging estimators introduced by
-[Matheron 1971](https://books.google.com/books/about/The_Theory_of_Regionalized_Variables_and.html?id=TGhGAAAAYAAJ),
-and various variogram models found in the literature. Currently, the following Kriging variants are implemented:
+[Matheron 1971](https://books.google.com/books/about/The_Theory_of_Regionalized_Variables_and.html?id=TGhGAAAAYAAJ).
+As the most general form of estimation with covariance/variogram models, Kriging does **not** require distributional
+assumptions, is well-defined for general Hilbert spaces, and is quite applicable to real world data.
+Currently, the following Kriging variants are implemented:
 
 - Simple Kriging
 - Ordinary Kriging
 - Universal Kriging
 - External Drift Kriging
-
-Unlike most popular estimators in statistics, Kriging does **not** assume independent and identically distributed residuals.
-Because no distributional assumptions are required in the derivation of Kriging estimators, these methods are quite general
-and applicable to real world data.
 
 ## Installation
 
