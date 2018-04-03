@@ -7,40 +7,12 @@ __precompile__()
 
 module KrigingEstimators
 
-using Distances
+using Variography
 using Combinatorics: multiexponents
-using SpecialFunctions: besselk
-using RecipesBase
 
-# won't be neeeded in Julia v0.7
-using Parameters
-
-# extend result_type and pairwise for theoretical variograms
-import Distances: result_type, pairwise
-
-# variograms & estimators
-include("variograms.jl")
 include("estimators.jl")
 
-# plot recipes
-include("plotrecipes/variograms.jl")
-
 export
-  # variograms
-  AbstractVariogram,
-  GaussianVariogram,
-  ExponentialVariogram,
-  MaternVariogram,
-  SphericalVariogram,
-  CubicVariogram,
-  PentasphericalVariogram,
-  PowerVariogram,
-  SineHoleVariogram,
-  CompositeVariogram,
-  isstationary,
-  pairwise,
-
-  # estimators
   KrigingEstimator,
   SimpleKriging,
   OrdinaryKriging,

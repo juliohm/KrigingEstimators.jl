@@ -1,4 +1,7 @@
 @testset "Estimators" begin
+  # floating point tolerance
+  tol = 10eps()
+
   # create some data
   dim = 3; nobs = 10
   X = rand(dim, nobs)
