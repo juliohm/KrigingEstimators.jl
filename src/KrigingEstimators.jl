@@ -7,16 +7,39 @@ __precompile__()
 
 module KrigingEstimators
 
-importall GeoStatsBase
-using GeoStatsDevTools
-
+using Distances
 using Combinatorics: multiexponents
-using StatsBase: sample
+using SpecialFunctions: besselk
+using RecipesBase
 
+# won't be neeeded in Julia v0.7
+using Parameters
+
+# extend result_type and pairwise for theoretical variograms
+import Distances: result_type, pairwise
+
+# variograms & estimators
+include("variograms.jl")
 include("estimators.jl")
-include("solvers.jl")
+
+# plot recipes
+include("plotrecipes/variograms.jl")
 
 export
+  # variograms
+  AbstractVariogram,
+  GaussianVariogram,
+  ExponentialVariogram,
+  MaternVariogram,
+  SphericalVariogram,
+  CubicVariogram,
+  PentasphericalVariogram,
+  PowerVariogram,
+  SineHoleVariogram,
+  CompositeVariogram,
+  isstationary,
+  pairwise,
+
   # estimators
   SimpleKriging,
   OrdinaryKriging,
@@ -24,10 +47,6 @@ export
   ExternalDriftKriging,
   fit!,
   weights,
-  estimate,
-
-  # solvers
-  Kriging,
-  SeqGaussSim
+  estimate
 
 end
