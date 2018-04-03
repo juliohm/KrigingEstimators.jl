@@ -4,8 +4,7 @@
 
 This package provides high-performance implementations of Kriging estimators introduced by
 [Matheron 1971](https://books.google.com/books/about/The_Theory_of_Regionalized_Variables_and.html?id=TGhGAAAAYAAJ),
-and Kriging-based solvers (e.g. sequential Gaussian simulation) for the [GeoStats.jl](https://github.com/juliohm/GeoStats.jl)
-framework. Currently, the following Kriging variants are implemented:
+and various variogram models found in the literature. Currently, the following Kriging variants are implemented:
 
 - Simple Kriging
 - Ordinary Kriging
