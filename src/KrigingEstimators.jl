@@ -7,8 +7,11 @@ __precompile__()
 
 module KrigingEstimators
 
-using Variography
+using Reexport
 using Combinatorics: multiexponents
+
+# export variogram models
+@reexport using Variography
 
 include("estimators.jl")
 
