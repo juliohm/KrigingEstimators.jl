@@ -23,7 +23,7 @@
 """
 mutable struct ExternalDriftKriging{T<:Real,V} <: KrigingEstimator
   # input fields
-  γ::AbstractVariogram
+  γ::Variogram
   drifts::Vector{Function}
 
   # state fields

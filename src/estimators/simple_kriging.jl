@@ -19,7 +19,7 @@
 """
 mutable struct SimpleKriging{T<:Real,V} <: KrigingEstimator
   # input fields
-  γ::AbstractVariogram
+  γ::Variogram
   μ::V
 
   # state fields

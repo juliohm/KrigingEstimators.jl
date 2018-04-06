@@ -20,7 +20,7 @@
 """
 mutable struct UniversalKriging{T<:Real,V} <: KrigingEstimator
   # input fields
-  γ::AbstractVariogram
+  γ::Variogram
   degree::Int
 
   # state fields

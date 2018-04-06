@@ -14,7 +14,7 @@
 """
 mutable struct OrdinaryKriging{T<:Real,V} <: KrigingEstimator
   # input fields
-  γ::AbstractVariogram
+  γ::Variogram
 
   # state fields
   X::Matrix{T}
