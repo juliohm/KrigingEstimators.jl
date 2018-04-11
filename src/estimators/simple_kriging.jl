@@ -56,5 +56,5 @@ function combine(estimator::SimpleKriging{T,V},
   λ = weights.λ
   y = z - μ
 
-  μ + y⋅λ, γ.sill - b⋅λ
+  μ + y⋅λ, sill(γ) - b⋅λ
 end

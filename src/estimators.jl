@@ -68,7 +68,7 @@ function set_lhs!(estimator::KrigingEstimator)
   X = estimator.X; γ = estimator.γ
 
   # LHS variogram/covariance
-  Γ = isstationary(γ) ? γ.sill - pairwise(γ, X) : pairwise(γ, X)
+  Γ = isstationary(γ) ? sill(γ) - pairwise(γ, X) : pairwise(γ, X)
 
   add_constraints_lhs!(estimator, Γ)
 end
@@ -85,7 +85,7 @@ function set_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector)
   RHS = estimator.RHS
   for j in 1:size(X, 2)
     xj = view(X, :, j)
-    RHS[j] = isstationary(γ) ? γ.sill - γ(xj, xₒ) : γ(xj, xₒ)
+    RHS[j] = isstationary(γ) ? sill(γ) - γ(xj, xₒ) : γ(xj, xₒ)
   end
 
   add_constraints_rhs!(estimator, xₒ)
@@ -127,7 +127,7 @@ function combine(estimator::KrigingEstimator, weights::Weights, z::AbstractVecto
   ν = weights.ν
 
   if isstationary(γ)
-    z⋅λ, γ.sill - b⋅[λ;ν]
+    z⋅λ, sill(γ) - b⋅[λ;ν]
   else
     z⋅λ, b⋅[λ;ν]
   end
