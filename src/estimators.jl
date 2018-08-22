@@ -27,7 +27,7 @@ function fit!(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
   # pre-allocate memory for RHS
   T = eltype(estimator.LHS)
   n = size(estimator.LHS, 1)
-  estimator.RHS = Vector{T}(n)
+  estimator.RHS = Vector{T}(undef, n)
 
   nothing
 end
@@ -68,7 +68,7 @@ function set_lhs!(estimator::KrigingEstimator)
   X = estimator.X; γ = estimator.γ
 
   # LHS variogram/covariance
-  Γ = isstationary(γ) ? sill(γ) - pairwise(γ, X) : pairwise(γ, X)
+  Γ = isstationary(γ) ? sill(γ) .- pairwise(γ, X) : pairwise(γ, X)
 
   add_constraints_lhs!(estimator, Γ)
 end

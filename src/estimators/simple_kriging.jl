@@ -25,7 +25,7 @@ mutable struct SimpleKriging{T<:Real,V} <: KrigingEstimator
   # state fields
   X::Matrix{T}
   z::Vector{V}
-  LHS::LinAlg.Factorization
+  LHS::Factorization
   RHS::Vector
 
   function SimpleKriging{T,V}(γ, μ; X=nothing, z=nothing) where {T<:Real,V}
@@ -42,7 +42,7 @@ end
 SimpleKriging(X, z, γ, μ) = SimpleKriging{eltype(X),eltype(z)}(γ, μ, X=X, z=z)
 
 function add_constraints_lhs!(estimator::SimpleKriging, Γ::AbstractMatrix)
-  estimator.LHS = cholfact(Γ)
+  estimator.LHS = cholesky(Γ, Val(false))
   nothing
 end
 
@@ -54,7 +54,7 @@ function combine(estimator::SimpleKriging{T,V},
   μ = estimator.μ
   b = estimator.RHS
   λ = weights.λ
-  y = z - μ
+  y = z .- μ
 
   μ + y⋅λ, sill(γ) - b⋅λ
 end

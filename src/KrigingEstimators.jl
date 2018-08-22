@@ -8,6 +8,7 @@ __precompile__()
 module KrigingEstimators
 
 using Reexport
+using LinearAlgebra
 using Combinatorics: multiexponents
 
 # export variogram models

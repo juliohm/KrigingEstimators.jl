@@ -1,6 +1,7 @@
 using KrigingEstimators
-using Variography
-using Base.Test
+using LinearAlgebra
+using Statistics
+using Test
 
 # list of maintainers
 maintainers = ["juliohm"]

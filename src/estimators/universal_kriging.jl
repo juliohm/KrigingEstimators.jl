@@ -26,7 +26,7 @@ mutable struct UniversalKriging{T<:Real,V} <: KrigingEstimator
   # state fields
   X::Matrix{T}
   z::Vector{V}
-  LHS::LinAlg.Factorization
+  LHS::Factorization
   RHS::Vector
   exponents::Matrix{Int}
 
@@ -53,7 +53,7 @@ function add_constraints_lhs!(estimator::UniversalKriging, Γ::AbstractMatrix)
   exponents = hcat(expmats...)
 
   # sort expansion for better conditioned Kriging matrices
-  sorted = sortperm(vec(maximum(exponents, 1)), rev=true)
+  sorted = sortperm(vec(maximum(exponents, dims=1)), rev=true)
   exponents = exponents[:,sorted]
 
   # update object field
@@ -63,7 +63,7 @@ function add_constraints_lhs!(estimator::UniversalKriging, Γ::AbstractMatrix)
   nterms = size(exponents, 2)
   F = [prod(X[:,i].^exponents[:,j]) for i=1:nobs, j=1:nterms]
 
-  estimator.LHS = lufact([Γ F; F' zeros(eltype(Γ), nterms, nterms)])
+  estimator.LHS = lu([Γ F; F' zeros(eltype(Γ), nterms, nterms)])
 
   nothing
 end

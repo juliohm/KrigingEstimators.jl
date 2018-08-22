@@ -19,7 +19,7 @@ mutable struct OrdinaryKriging{T<:Real,V} <: KrigingEstimator
   # state fields
   X::Matrix{T}
   z::Vector{V}
-  LHS::LinAlg.Factorization
+  LHS::Factorization
   RHS::Vector
 
   function OrdinaryKriging{T,V}(γ; X=nothing, z=nothing) where {T<:Real,V}
@@ -37,7 +37,7 @@ OrdinaryKriging(X, z, γ) = OrdinaryKriging{eltype(X),eltype(z)}(γ, X=X, z=z)
 function add_constraints_lhs!(estimator::OrdinaryKriging, Γ::AbstractMatrix)
   T = eltype(Γ); n = size(Γ, 1)
   a = ones(T, n); b = zero(T)
-  estimator.LHS = lufact([Γ a; a' b])
+  estimator.LHS = lu([Γ a; a' b])
 
   nothing
 end

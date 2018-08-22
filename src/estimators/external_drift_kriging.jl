@@ -29,7 +29,7 @@ mutable struct ExternalDriftKriging{T<:Real,V} <: KrigingEstimator
   # state fields
   X::Matrix{T}
   z::Vector{V}
-  LHS::LinAlg.Factorization
+  LHS::Factorization
   RHS::Vector
 
   function ExternalDriftKriging{T,V}(γ, drifts; X=nothing, z=nothing) where {T<:Real,V}
@@ -52,7 +52,7 @@ function add_constraints_lhs!(estimator::ExternalDriftKriging, Γ::AbstractMatri
   # polynomial drift matrix
   F = [m(X[:,i]) for i=1:nobs, m in drifts]
 
-  estimator.LHS = lufact([Γ F; F' zeros(eltype(Γ), ndrifts, ndrifts)])
+  estimator.LHS = lu([Γ F; F' zeros(eltype(Γ), ndrifts, ndrifts)])
 
   nothing
 end
