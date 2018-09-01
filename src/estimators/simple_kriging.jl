@@ -42,7 +42,7 @@ end
 SimpleKriging(X, z, γ, μ) = SimpleKriging{eltype(X),eltype(z)}(γ, μ, X=X, z=z)
 
 function add_constraints_lhs!(estimator::SimpleKriging, Γ::AbstractMatrix)
-  estimator.LHS = cholesky(Γ, Val(false))
+  estimator.LHS = cholesky(Γ)
   nothing
 end
 
