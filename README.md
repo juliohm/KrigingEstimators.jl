@@ -19,7 +19,7 @@ Currently, the following Kriging variants are implemented:
 Get the latest stable release with Julia's package manager:
 
 ```julia
-Pkg.add("KrigingEstimators")
+] add KrigingEstimators
 ```
 
 ## Usage
