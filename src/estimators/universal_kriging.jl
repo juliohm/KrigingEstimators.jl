@@ -96,4 +96,4 @@ function set_constraints_rhs!(estimator::UniversalKriging, xₒ::AbstractVector)
   nothing
 end
 
-factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = lu(LHS)
+factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = lu(LHS, check=false)

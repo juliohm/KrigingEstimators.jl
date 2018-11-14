@@ -47,7 +47,7 @@ set_constraints_lhs!(estimator::SimpleKriging, LHS::AbstractMatrix) = nothing
 
 set_constraints_rhs!(estimator::SimpleKriging, xₒ::AbstractVector) = nothing
 
-factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(LHS)
+factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(LHS, check=false)
 
 function combine(estimator::SimpleKriging{T,V},
                  weights::Weights, z::AbstractVector) where {T<:Real,V}

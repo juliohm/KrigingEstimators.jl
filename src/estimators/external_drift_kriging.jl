@@ -78,4 +78,4 @@ function set_constraints_rhs!(estimator::ExternalDriftKriging, xₒ::AbstractVec
   nothing
 end
 
-factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = lu(LHS)
+factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = lu(LHS, check=false)
