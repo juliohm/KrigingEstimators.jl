@@ -43,7 +43,7 @@ end
 
 UniversalKriging(X, z, γ, degree) = UniversalKriging{eltype(X),eltype(z)}(γ, degree, X=X, z=z)
 
-function add_constraints_lhs!(estimator::UniversalKriging, Γ::AbstractMatrix)
+function nconstraints(estimator::UniversalKriging)
   X = estimator.X
   degree = estimator.degree
   dim, nobs = size(X)
@@ -59,19 +59,34 @@ function add_constraints_lhs!(estimator::UniversalKriging, Γ::AbstractMatrix)
   # update object field
   estimator.exponents = exponents
 
-  # polynomial drift matrix
-  nterms = size(exponents, 2)
-  F = [prod(X[:,i].^exponents[:,j]) for i=1:nobs, j=1:nterms]
+  # return number of terms
+  size(exponents, 2)
+end
 
-  estimator.LHS = lu([Γ F; F' zeros(eltype(Γ), nterms, nterms)])
+function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix)
+  X = estimator.X
+  exponents = estimator.exponents
+
+  nobs = size(X, 2)
+  nterms = size(exponents, 2)
+  T = eltype(LHS)
+
+  # set polynomial drift blocks
+  for i=1:nobs, j=1:nterms
+    LHS[nobs+j,i] = prod(X[:,i].^exponents[:,j])
+    LHS[i,nobs+j] = LHS[nobs+j,i]
+  end
+
+  # set zero block
+  LHS[nobs+1:end,nobs+1:end] .= zero(T)
 
   nothing
 end
 
-function add_constraints_rhs!(estimator::UniversalKriging, xₒ::AbstractVector)
+function set_constraints_rhs!(estimator::UniversalKriging, xₒ::AbstractVector)
   exponents = estimator.exponents
   nterms = size(exponents, 2)
-  nobs = size(estimator.X, 2)
+  nobs = length(estimator.z)
 
   RHS = estimator.RHS
   for j in 1:nterms
@@ -80,3 +95,5 @@ function add_constraints_rhs!(estimator::UniversalKriging, xₒ::AbstractVector)
 
   nothing
 end
+
+factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = lu(LHS)

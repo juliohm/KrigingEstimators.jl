@@ -44,20 +44,29 @@ end
 
 ExternalDriftKriging(X, z, γ, drifts) = ExternalDriftKriging{eltype(X),eltype(z)}(γ, drifts, X=X, z=z)
 
-function add_constraints_lhs!(estimator::ExternalDriftKriging, Γ::AbstractMatrix)
-  X = estimator.X; drifts = estimator.drifts
-  dim, nobs = size(X)
+nconstraints(estimator::ExternalDriftKriging) = length(estimator.drifts)
+
+function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatrix)
+  X = estimator.X
+  drifts = estimator.drifts
+
+  nobs = size(X, 2)
   ndrifts = length(drifts)
+  T = eltype(LHS)
 
-  # polynomial drift matrix
-  F = [m(X[:,i]) for i=1:nobs, m in drifts]
+  # set drift blocks
+  for i=1:nobs, j=1:ndrifts
+    LHS[nobs+j,i] = drifts[j](X[:,i])
+    LHS[i,nobs+j] = LHS[nobs+j,i]
+  end
 
-  estimator.LHS = lu([Γ F; F' zeros(eltype(Γ), ndrifts, ndrifts)])
+  # set zero block
+  LHS[nobs+1:end,nobs+1:end] .= zero(T)
 
   nothing
 end
 
-function add_constraints_rhs!(estimator::ExternalDriftKriging, xₒ::AbstractVector)
+function set_constraints_rhs!(estimator::ExternalDriftKriging, xₒ::AbstractVector)
   drifts = estimator.drifts
   nobs = size(estimator.X, 2)
 
@@ -68,3 +77,5 @@ function add_constraints_rhs!(estimator::ExternalDriftKriging, xₒ::AbstractVec
 
   nothing
 end
+
+factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = lu(LHS)

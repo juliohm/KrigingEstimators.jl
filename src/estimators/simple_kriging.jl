@@ -41,12 +41,13 @@ end
 
 SimpleKriging(X, z, γ, μ) = SimpleKriging{eltype(X),eltype(z)}(γ, μ, X=X, z=z)
 
-function add_constraints_lhs!(estimator::SimpleKriging, Γ::AbstractMatrix)
-  estimator.LHS = cholesky(Γ)
-  nothing
-end
+nconstraints(estimator::SimpleKriging) = 0
 
-add_constraints_rhs!(estimator::SimpleKriging, xₒ::AbstractVector) = nothing
+set_constraints_lhs!(estimator::SimpleKriging, LHS::AbstractMatrix) = nothing
+
+set_constraints_rhs!(estimator::SimpleKriging, xₒ::AbstractVector) = nothing
+
+factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(LHS)
 
 function combine(estimator::SimpleKriging{T,V},
                  weights::Weights, z::AbstractVector) where {T<:Real,V}

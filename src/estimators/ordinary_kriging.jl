@@ -34,17 +34,22 @@ end
 
 OrdinaryKriging(X, z, γ) = OrdinaryKriging{eltype(X),eltype(z)}(γ, X=X, z=z)
 
-function add_constraints_lhs!(estimator::OrdinaryKriging, Γ::AbstractMatrix)
-  T = eltype(Γ); n = size(Γ, 1)
-  a = ones(T, n); b = zero(T)
-  estimator.LHS = lu([Γ a; a' b])
+nconstraints(estimator::OrdinaryKriging) = 1
+
+function set_constraints_lhs!(estimator::OrdinaryKriging, LHS::AbstractMatrix)
+  T = eltype(LHS)
+  LHS[end,:]   .= one(T)
+  LHS[:,end]   .= one(T)
+  LHS[end,end]  = zero(T)
 
   nothing
 end
 
-function add_constraints_rhs!(estimator::OrdinaryKriging, xₒ::AbstractVector)
+function set_constraints_rhs!(estimator::OrdinaryKriging, xₒ::AbstractVector)
   RHS = estimator.RHS
   RHS[end] = one(eltype(RHS))
 
   nothing
 end
+
+factorize(estimator::OrdinaryKriging, LHS::AbstractMatrix) = lu(LHS)

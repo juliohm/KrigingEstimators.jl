@@ -22,14 +22,14 @@ function fit!(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
   estimator.z = z
 
   # build and factorize LHS
-  set_lhs!(estimator)
+  status = set_lhs!(estimator, X)
 
   # pre-allocate memory for RHS
   T = eltype(estimator.LHS)
-  n = size(estimator.LHS, 1)
-  estimator.RHS = Vector{T}(undef, n)
+  m = size(estimator.LHS, 1)
+  estimator.RHS = Vector{T}(undef, m)
 
-  nothing
+  status
 end
 
 """
@@ -47,7 +47,7 @@ Compute the weights λ (and Lagrange multipliers ν) for the
 `estimator` at coordinates `xₒ`.
 """
 function weights(estimator::KrigingEstimator, xₒ::AbstractVector)
-  nobs = size(estimator.X, 2)
+  nobs = length(estimator.z)
 
   # build RHS
   set_rhs!(estimator, xₒ)
@@ -60,17 +60,37 @@ function weights(estimator::KrigingEstimator, xₒ::AbstractVector)
 end
 
 """
-    set_lhs!(estimator)
+    set_lhs!(estimator, X)
 
-Set LHS of Kriging system.
+Set LHS of Kriging system using spatial configuration `X`.
 """
-function set_lhs!(estimator::KrigingEstimator)
-  X = estimator.X; γ = estimator.γ
+function set_lhs!(estimator::KrigingEstimator, X::AbstractMatrix)
+  γ = estimator.γ
+  nobs = length(estimator.z)
+  ncons = nconstraints(estimator)
 
-  # LHS variogram/covariance
-  Γ = isstationary(γ) ? sill(γ) .- pairwise(γ, X) : pairwise(γ, X)
+  # pre-allocate memory for LHS
+  x = view(X, :, 1)
+  T = Variography.result_type(γ, x, x)
+  m = nobs + ncons
+  LHS = Matrix{T}(undef, m, m)
 
-  add_constraints_lhs!(estimator, Γ)
+  # set variogram/covariance block
+  pairwise!(LHS, γ, X)
+  if isstationary(γ)
+    for j=1:nobs, i=1:nobs
+      LHS[i,j] = sill(γ) - LHS[i,j]
+    end
+  end
+
+  # set blocks of constraints
+  set_constraints_lhs!(estimator, LHS)
+
+  # factorize LHS and save
+  estimator.LHS = factorize(estimator, LHS)
+
+  # return factorization status
+  issuccess(estimator.LHS)
 end
 
 """
@@ -79,7 +99,8 @@ end
 Set RHS of Kriging system at coodinates `xₒ`.
 """
 function set_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector)
-  X = estimator.X; γ = estimator.γ
+  X = estimator.X
+  γ = estimator.γ
 
   # RHS variogram/covariance
   RHS = estimator.RHS
@@ -88,22 +109,36 @@ function set_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector)
     RHS[j] = isstationary(γ) ? sill(γ) - γ(xj, xₒ) : γ(xj, xₒ)
   end
 
-  add_constraints_rhs!(estimator, xₒ)
+  set_constraints_rhs!(estimator, xₒ)
 end
 
 """
-    add_constraints_lhs!(estimator, Γ)
+    nconstraints(estimator)
 
-Add constraints to LHS of Kriging system.
+Return number of constraints for `estimator`.
 """
-add_constraints_lhs!(estimator::KrigingEstimator, Γ::AbstractMatrix) = error("not implemented")
+nconstraints(estimator::KrigingEstimator) = error("not implemented")
 
 """
-    add_constraints_rhs!(estimator, xₒ)
+    set_constraints_lhs!(estimator, LHS)
 
-Add constraints to RHS of Kriging system.
+Set constraints in LHS of Kriging system.
 """
-add_constraints_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector) = error("not implemented")
+set_constraints_lhs!(estimator::KrigingEstimator, LHS::AbstractMatrix) = error("not implemented")
+
+"""
+    set_constraints_rhs!(estimator, xₒ)
+
+Set constraints in RHS of Kriging system.
+"""
+set_constraints_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector) = error("not implemented")
+
+"""
+    factorize(estimator, LHS)
+
+Factorize LHS of Kriging system with appropriate factorization method.
+"""
+factorize(estimator::KrigingEstimator, LHS::AbstractMatrix) = error("not implemented")
 
 """
     Weights(λ, ν)
