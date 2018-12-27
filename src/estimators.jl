@@ -32,11 +32,11 @@ function fit!(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
 end
 
 """
-    estimate(estimator, xₒ)
+    predict(estimator, xₒ)
 
 Compute mean and variance for the `estimator` at coordinates `xₒ`.
 """
-estimate(estimator::KrigingEstimator, xₒ::AbstractVector) =
+predict(estimator::KrigingEstimator, xₒ::AbstractVector) =
   combine(estimator, weights(estimator, xₒ), estimator.z)
 
 """
