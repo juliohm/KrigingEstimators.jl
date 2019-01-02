@@ -78,7 +78,7 @@ function set_lhs!(estimator::KrigingEstimator, X::AbstractMatrix)
   pairwise!(LHS, γ, X)
   if isstationary(γ)
     for j=1:nobs, i=1:nobs
-      LHS[i,j] = sill(γ) - LHS[i,j]
+      @inbounds LHS[i,j] = sill(γ) - LHS[i,j]
     end
   end
 
