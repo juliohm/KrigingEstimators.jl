@@ -69,7 +69,7 @@ function set_lhs!(estimator::KrigingEstimator, X::AbstractMatrix)
   ncons = nconstraints(estimator)
 
   # pre-allocate memory for LHS
-  x = view(X, :, 1)
+  x = view(X,:,1)
   T = Variography.result_type(γ, x, x)
   m = nobs + ncons
   LHS = Matrix{T}(undef, m, m)
@@ -103,8 +103,8 @@ function set_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector)
 
   # RHS variogram/covariance
   RHS = estimator.RHS
-  for j in 1:size(X, 2)
-    xj = view(X, :, j)
+  @inbounds for j in 1:size(X, 2)
+    xj = view(X,:,j)
     RHS[j] = isstationary(γ) ? sill(γ) - γ(xj, xₒ) : γ(xj, xₒ)
   end
 
