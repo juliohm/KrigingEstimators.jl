@@ -3,56 +3,47 @@
 # ------------------------------------------------------------------
 
 """
+    SimpleKriging(γ, μ)
     SimpleKriging(X, z, γ, μ)
 
-## Parameters
+Simple Kriging with variogram model `γ` and constant mean `μ`.
 
-* X ∈ ℜ^(mxn) - matrix of data locations
-* z ∈ ℜⁿ      - vector of observations for X
-* γ           - variogram model
-* μ ∈ ℜ       - mean of z
+Optionally, pass the coordinates `X` and values `z`
+to the [`fit`](@ref) function.
 
 ### Notes
 
 * Simple Kriging requires stationary variograms
 """
-mutable struct SimpleKriging{T<:Real,V} <: KrigingEstimator
+struct SimpleKriging{G<:Variogram,V} <: KrigingEstimator
   # input fields
-  γ::Variogram
+  γ::G
   μ::V
 
-  # state fields
-  X::Matrix{T}
-  z::Vector{V}
-  LHS::Factorization
-  RHS::Vector
-
-  function SimpleKriging{T,V}(γ, μ; X=nothing, z=nothing) where {T<:Real,V}
+  function SimpleKriging{G,V}(γ, μ) where {G<:Variogram,V}
     @assert isstationary(γ) "Simple Kriging requires stationary variogram"
-    SK = new(γ, μ)
-    if X ≠ nothing && z ≠ nothing
-      fit!(SK, X, z)
-    end
-
-    SK
+    new(γ, μ)
   end
 end
 
-SimpleKriging(X, z, γ, μ) = SimpleKriging{eltype(X),eltype(z)}(γ, μ, X=X, z=z)
+SimpleKriging(γ, μ) = SimpleKriging{typeof(γ),typeof(μ)}(γ, μ)
+
+SimpleKriging(X, z, γ, μ) = fit(SimpleKriging(γ, μ), X, z)
 
 nconstraints(estimator::SimpleKriging) = 0
 
-set_constraints_lhs!(estimator::SimpleKriging, LHS::AbstractMatrix) = nothing
-
-set_constraints_rhs!(estimator::SimpleKriging, xₒ::AbstractVector) = nothing
+set_constraints_lhs!(estimator::SimpleKriging, LHS::AbstractMatrix, X::AbstractMatrix) = nothing
 
 factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(LHS, check=false)
 
-function combine(estimator::SimpleKriging{T,V},
-                 weights::Weights, z::AbstractVector) where {T<:Real,V}
-  γ = estimator.γ
-  μ = estimator.μ
-  b = estimator.RHS
+set_constraints_rhs!(estimator::FittedKriging{E,S},
+                     xₒ::AbstractVector) where {E<:SimpleKriging,S<:KrigingState} = nothing
+
+function combine(estimator::FittedKriging{E,S},
+                 weights::KrigingWeights, z::AbstractVector) where {E<:SimpleKriging,S<:KrigingState}
+  γ = estimator.estimator.γ
+  μ = estimator.estimator.μ
+  b = estimator.state.RHS
   λ = weights.λ
   y = z .- μ
 

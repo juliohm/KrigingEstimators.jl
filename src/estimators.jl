@@ -10,62 +10,83 @@ A Kriging estimator (e.g. Simple Kriging).
 abstract type KrigingEstimator end
 
 """
-    fit!(estimator, X, z)
+    KrigingState(X, z, LHS, RHS)
 
-Build LHS of Kriging system from coordinates `X` with
-values `z` and save factorization in `estimator`.
+A Kriging state stores information needed
+to perform estimation at any given location.
 """
-function fit!(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
-  # update data
-  estimator.X = X
-  estimator.z = z
-
-  # build and factorize LHS
-  status = set_lhs!(estimator, X)
-
-  # pre-allocate memory for RHS
-  T = eltype(estimator.LHS)
-  m = size(estimator.LHS, 1)
-  estimator.RHS = Vector{T}(undef, m)
-
-  status
+mutable struct KrigingState{T<:Real,V,
+                            A<:AbstractMatrix{T},
+                            B<:AbstractVector{V},
+                            F<:Factorization,R}
+  X::A
+  z::B
+  LHS::F
+  RHS::Vector{R}
 end
 
 """
-    predict(estimator, xₒ)
+    KrigingWeights(λ, ν)
 
-Compute mean and variance for the `estimator` at coordinates `xₒ`.
+An object storing Kriging weights `λ` and Lagrange multipliers `ν`.
 """
-predict(estimator::KrigingEstimator, xₒ::AbstractVector) =
-  combine(estimator, weights(estimator, xₒ), estimator.z)
-
-"""
-    weights(estimator, xₒ)
-
-Compute the weights λ (and Lagrange multipliers ν) for the
-`estimator` at coordinates `xₒ`.
-"""
-function weights(estimator::KrigingEstimator, xₒ::AbstractVector)
-  nobs = length(estimator.z)
-
-  # build RHS
-  set_rhs!(estimator, xₒ)
-
-  # solve Kriging system
-  x = estimator.LHS \ estimator.RHS
-
-  # return weights
-  Weights(x[1:nobs], x[nobs+1:end])
+struct KrigingWeights{T<:Real,A<:AbstractVector{T}}
+  λ::A
+  ν::A
 end
 
 """
-    set_lhs!(estimator, X)
+    FittedKriging(estimator, state)
 
-Set LHS of Kriging system using spatial configuration `X`.
+An object that can be used for making predictions using the
+parameters in `estimator` and the current Kriging `state`.
 """
-function set_lhs!(estimator::KrigingEstimator, X::AbstractMatrix)
+struct FittedKriging{E<:KrigingEstimator,S<:KrigingState}
+  estimator::E
+  state::S
+end
+
+"""
+    status(fittedkrig)
+
+Return the status of the `fittedkrig` object, meaning
+the factorization of the Kriging system was successful.
+"""
+status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
+
+#--------------
+# FITTING STEP
+#--------------
+
+"""
+    fit(estimator, X, z)
+
+Build Kriging system from coordinates `X` and
+values `z` and return a fitted estimator.
+"""
+function fit(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
+  # build Kriging system
+  LHS = lhs(estimator, X)
+  RHS = Vector{eltype(LHS)}(undef, size(LHS,1))
+
+  # factorize LHS
+  FLHS = factorize(estimator, LHS)
+
+  # record Kriging state
+  state = KrigingState(X, z, FLHS, RHS)
+
+  # return fitted estimator
+  FittedKriging(estimator, state)
+end
+
+"""
+    lhs(estimator, X)
+
+Return LHS of Kriging system using spatial configuration `X`.
+"""
+function lhs(estimator::KrigingEstimator, X::AbstractMatrix)
   γ = estimator.γ
-  nobs = length(estimator.z)
+  nobs = size(X, 2)
   ncons = nconstraints(estimator)
 
   # pre-allocate memory for LHS
@@ -83,32 +104,9 @@ function set_lhs!(estimator::KrigingEstimator, X::AbstractMatrix)
   end
 
   # set blocks of constraints
-  set_constraints_lhs!(estimator, LHS)
+  set_constraints_lhs!(estimator, LHS, X)
 
-  # factorize LHS and save
-  estimator.LHS = factorize(estimator, LHS)
-
-  # return factorization status
-  issuccess(estimator.LHS)
-end
-
-"""
-    set_rhs!(estimator, xₒ)
-
-Set RHS of Kriging system at coodinates `xₒ`.
-"""
-function set_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector)
-  X = estimator.X
-  γ = estimator.γ
-
-  # RHS variogram/covariance
-  RHS = estimator.RHS
-  @inbounds for j in 1:size(X, 2)
-    xj = view(X,:,j)
-    RHS[j] = isstationary(γ) ? sill(γ) - γ(xj, xₒ) : γ(xj, xₒ)
-  end
-
-  set_constraints_rhs!(estimator, xₒ)
+  LHS
 end
 
 """
@@ -119,18 +117,12 @@ Return number of constraints for `estimator`.
 nconstraints(estimator::KrigingEstimator) = error("not implemented")
 
 """
-    set_constraints_lhs!(estimator, LHS)
+    set_constraints_lhs!(estimator, LHS, X)
 
 Set constraints in LHS of Kriging system.
 """
-set_constraints_lhs!(estimator::KrigingEstimator, LHS::AbstractMatrix) = error("not implemented")
-
-"""
-    set_constraints_rhs!(estimator, xₒ)
-
-Set constraints in RHS of Kriging system.
-"""
-set_constraints_rhs!(estimator::KrigingEstimator, xₒ::AbstractVector) = error("not implemented")
+set_constraints_lhs!(estimator::KrigingEstimator,
+                     LHS::AbstractMatrix, X::AbstractMatrix) = error("not implemented")
 
 """
     factorize(estimator, LHS)
@@ -139,37 +131,91 @@ Factorize LHS of Kriging system with appropriate factorization method.
 """
 factorize(estimator::KrigingEstimator, LHS::AbstractMatrix) = error("not implemented")
 
-"""
-    Weights(λ, ν)
+#-----------------
+# PREDICTION STEP
+#-----------------
 
-An object storing Kriging weights `λ` and Lagrange multipliers `ν`.
 """
-struct Weights{T<:Real}
-  λ::Vector{T}
-  ν::Vector{T}
+    predict(estimator, xₒ)
+
+Compute mean and variance for the `estimator` at coordinates `xₒ`.
+"""
+predict(estimator::FittedKriging, xₒ::AbstractVector) =
+  combine(estimator, weights(estimator, xₒ), estimator.state.z)
+
+"""
+    weights(estimator, xₒ)
+
+Compute the weights λ (and Lagrange multipliers ν) for the
+`estimator` at coordinates `xₒ`.
+"""
+function weights(estimator::FittedKriging, xₒ::AbstractVector)
+  nobs = size(estimator.state.X, 2)
+
+  set_rhs!(estimator, xₒ)
+
+  # solve Kriging system
+  x = estimator.state.LHS \ estimator.state.RHS
+
+  λ = view(x,1:nobs)
+  ν = view(x,nobs+1:length(x))
+
+  KrigingWeights(λ, ν)
 end
+
+"""
+    set_rhs!(estimator, xₒ)
+
+Set RHS of Kriging system at coodinates `xₒ`.
+"""
+function set_rhs!(estimator::FittedKriging, xₒ::AbstractVector)
+  γ = estimator.estimator.γ
+  X = estimator.state.X
+  RHS = estimator.state.RHS
+
+  # RHS variogram/covariance
+  @inbounds for j in 1:size(X, 2)
+    xj = view(X,:,j)
+    RHS[j] = isstationary(γ) ? sill(γ) - γ(xj, xₒ) : γ(xj, xₒ)
+  end
+
+  set_constraints_rhs!(estimator, xₒ)
+end
+
+"""
+    set_constraints_rhs!(estimator, xₒ)
+
+Set constraints in RHS of Kriging system.
+"""
+set_constraints_rhs!(estimator::FittedKriging, xₒ::AbstractVector) = error("not implemented")
 
 """
     combine(estimator, weights, z)
 
 Combine `weights` with values `z` to produce mean and variance.
 """
-function combine(estimator::KrigingEstimator, weights::Weights, z::AbstractVector)
-  γ = estimator.γ
-  b = estimator.RHS
+function combine(estimator::FittedKriging, weights::KrigingWeights, z::AbstractVector)
+  γ = estimator.estimator.γ
+  b = estimator.state.RHS
   λ = weights.λ
   ν = weights.ν
 
+  # compute b⋅[λ;ν]
+  nobs  = length(λ)
+  c₁ = view(b,1:nobs)⋅λ
+  c₂ = view(b,nobs+1:length(b))⋅ν
+  c = c₁ + c₂
+
   if isstationary(γ)
-    z⋅λ, sill(γ) - b⋅[λ;ν]
+    z⋅λ, sill(γ) - c
   else
-    z⋅λ, b⋅[λ;ν]
+    z⋅λ, c
   end
 end
 
-#------------------
+#-----------------
 # IMPLEMENTATIONS
-#------------------
+#-----------------
 include("estimators/simple_kriging.jl")
 include("estimators/ordinary_kriging.jl")
 include("estimators/universal_kriging.jl")

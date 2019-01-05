@@ -3,14 +3,14 @@
 # ------------------------------------------------------------------
 
 """
+    ExternalDriftKriging(γ, drifts)
     ExternalDriftKriging(X, z, γ, drifts)
 
-## Parameters
+External Drift Kriging with variogram model `γ` and
+external `drifts` functions.
 
-* X ∈ ℜ^(mxn) - matrix of data locations
-* z ∈ ℜⁿ      - vector of observations for X
-* γ           - variogram model
-* drifts      - vector of external drift functions m: ℜᵐ ↦ ℜ
+Optionally, pass the coordinates `X` and values `z`
+to the [`fit`](@ref) function.
 
 ### Notes
 
@@ -20,37 +20,21 @@
 * [`OrdinaryKriging`](@ref) is recovered for `drifts = [x->1]`
 * For polynomial mean, see [`UniversalKriging`](@ref)
 """
-mutable struct ExternalDriftKriging{T<:Real,V} <: KrigingEstimator
-  # input fields
-  γ::Variogram
+struct ExternalDriftKriging{G<:Variogram} <: KrigingEstimator
+  γ::G
   drifts::Vector{Function}
-
-  # state fields
-  X::Matrix{T}
-  z::Vector{V}
-  LHS::Factorization
-  RHS::Vector
-
-  function ExternalDriftKriging{T,V}(γ, drifts; X=nothing, z=nothing) where {T<:Real,V}
-    EDK = new(γ, drifts)
-    if X ≠ nothing && z ≠ nothing
-      fit!(EDK, X, z)
-    end
-
-    EDK
-  end
 end
 
-ExternalDriftKriging(X, z, γ, drifts) = ExternalDriftKriging{eltype(X),eltype(z)}(γ, drifts, X=X, z=z)
+ExternalDriftKriging(γ, drifts) = ExternalDriftKriging{typeof(γ)}(γ, drifts)
+
+ExternalDriftKriging(X, z, γ, drifts) = fit(ExternalDriftKriging(γ, drifts), X ,z)
 
 nconstraints(estimator::ExternalDriftKriging) = length(estimator.drifts)
 
-function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatrix)
-  X = estimator.X
+function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatrix, X::AbstractMatrix)
   drifts = estimator.drifts
-
-  nobs = size(X, 2)
   ndrifts = length(drifts)
+  nobs = size(X, 2)
   T = eltype(LHS)
 
   # set drift blocks
@@ -65,16 +49,17 @@ function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatr
   nothing
 end
 
-function set_constraints_rhs!(estimator::ExternalDriftKriging, xₒ::AbstractVector)
-  drifts = estimator.drifts
-  nobs = size(estimator.X, 2)
+factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = lu(LHS, check=false)
 
-  RHS = estimator.RHS
+function set_constraints_rhs!(estimator::FittedKriging{E,S},
+                              xₒ::AbstractVector) where {E<:ExternalDriftKriging,S<:KrigingState}
+  drifts = estimator.estimator.drifts
+  RHS = estimator.state.RHS
+  nobs = size(estimator.state.X, 2)
+
   for (j, m) in enumerate(drifts)
     RHS[nobs+j] = m(xₒ)
   end
 
   nothing
 end
-
-factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = lu(LHS, check=false)

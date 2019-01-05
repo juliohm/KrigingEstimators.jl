@@ -3,69 +3,53 @@
 # ------------------------------------------------------------------
 
 """
+    UniversalKriging(γ, degree, dim)
     UniversalKriging(X, z, γ, degree)
 
-## Parameters
+Universal Kriging with variogram model `γ` and polynomial
+`degree` on a spatial domain of dimension `dim`.
 
-* X ∈ ℜ^(mxn) - matrix of data locations
-* z ∈ ℜⁿ      - vector of observations for X
-* γ           - variogram model
-* degree      - polynomial degree for the mean
+Optionally, pass the coordinates `X` and values `z`
+to the [`fit`](@ref) function.
 
 ### Notes
 
 * [`OrdinaryKriging`](@ref) is recovered for 0th degree polynomial
 * For non-polynomial mean, see [`ExternalDriftKriging`](@ref)
 """
-mutable struct UniversalKriging{T<:Real,V} <: KrigingEstimator
-  # input fields
-  γ::Variogram
+struct UniversalKriging{G<:Variogram} <: KrigingEstimator
+  γ::G
   degree::Int
-
-  # state fields
-  X::Matrix{T}
-  z::Vector{V}
-  LHS::Factorization
-  RHS::Vector
+  dim::Int
   exponents::Matrix{Int}
 
-  function UniversalKriging{T,V}(γ, degree; X=nothing, z=nothing) where {T<:Real,V}
+  function UniversalKriging{G}(γ, degree, dim) where {G<:Variogram}
     @assert degree ≥ 0 "degree must be nonnegative"
-    UK = new(γ, degree)
-    if X ≠ nothing && z ≠ nothing
-      fit!(UK, X, z)
-    end
-
-    UK
+    @assert dim > 0 "dimension must be positive"
+    exponents = UKexps(degree, dim)
+    new(γ, degree, dim, exponents)
   end
 end
 
-UniversalKriging(X, z, γ, degree) = UniversalKriging{eltype(X),eltype(z)}(γ, degree, X=X, z=z)
+UniversalKriging(γ, degree, dim) = UniversalKriging{typeof(γ)}(γ, degree, dim)
 
-function nconstraints(estimator::UniversalKriging)
-  X = estimator.X
-  degree = estimator.degree
-  dim, nobs = size(X)
+UniversalKriging(X, z, γ, degree) = fit(UniversalKriging(γ, degree, size(X,1)), X, z)
 
+function UKexps(degree::Int, dim::Int)
   # multinomial expansion
   expmats = [hcat(collect(multiexponents(dim, d))...) for d in 0:degree]
   exponents = hcat(expmats...)
 
   # sort expansion for better conditioned Kriging matrices
   sorted = sortperm(vec(maximum(exponents, dims=1)), rev=true)
-  exponents = exponents[:,sorted]
 
-  # update object field
-  estimator.exponents = exponents
-
-  # return number of terms
-  size(exponents, 2)
+  exponents[:,sorted]
 end
 
-function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix)
-  X = estimator.X
-  exponents = estimator.exponents
+nconstraints(estimator::UniversalKriging) = size(estimator.exponents, 2)
 
+function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix, X::AbstractMatrix)
+  exponents = estimator.exponents
   nobs = size(X, 2)
   nterms = size(exponents, 2)
   T = eltype(LHS)
@@ -82,17 +66,18 @@ function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix)
   nothing
 end
 
-function set_constraints_rhs!(estimator::UniversalKriging, xₒ::AbstractVector)
-  exponents = estimator.exponents
-  nterms = size(exponents, 2)
-  nobs = length(estimator.z)
+factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = lu(LHS, check=false)
 
-  RHS = estimator.RHS
+function set_constraints_rhs!(estimator::FittedKriging{E,S},
+                              xₒ::AbstractVector) where {E<:UniversalKriging,S<:KrigingState}
+  exponents = estimator.estimator.exponents
+  RHS = estimator.state.RHS
+  nobs = size(estimator.state.X, 2)
+  nterms = size(exponents, 2)
+
   for j in 1:nterms
     RHS[nobs+j] = prod(xₒ.^exponents[:,j])
   end
 
   nothing
 end
-
-factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = lu(LHS, check=false)

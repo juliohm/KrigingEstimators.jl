@@ -14,6 +14,7 @@ using Combinatorics: multiexponents
 include("estimators.jl")
 
 @deprecate estimate predict
+@deprecate fit! fit
 
 export
   KrigingEstimator,
@@ -21,8 +22,6 @@ export
   OrdinaryKriging,
   UniversalKriging,
   ExternalDriftKriging,
-  fit!,
-  predict,
-  weights
+  fit, status, predict, weights
 
 end
