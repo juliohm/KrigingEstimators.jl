@@ -1,6 +1,6 @@
 # KrigingEstimators.jl
 
-[![][travis-img]][travis-url] [![][julia-pkg-img]][julia-pkg-url] [![][codecov-img]][codecov-url]
+[![][travis-img]][travis-url] [![][codecov-img]][codecov-url]
 
 This package provides high-performance implementations of Kriging estimators introduced by
 [Matheron 1971](https://books.google.com/books/about/The_Theory_of_Regionalized_Variables_and.html?id=TGhGAAAAYAAJ),
@@ -34,9 +34,6 @@ If you have any questions, please contact our community on the [gitter channel](
 
 [travis-img]: https://travis-ci.org/juliohm/KrigingEstimators.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/juliohm/KrigingEstimators.jl
-
-[julia-pkg-img]: http://pkg.julialang.org/badges/KrigingEstimators_0.7.svg
-[julia-pkg-url]: http://pkg.julialang.org/?pkg=KrigingEstimators
 
 [codecov-img]: https://codecov.io/gh/juliohm/KrigingEstimators.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/juliohm/KrigingEstimators.jl
