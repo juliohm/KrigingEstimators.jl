@@ -1,15 +1,17 @@
 using KrigingEstimators
 using LinearAlgebra
 using Statistics
-using Test
-
-# list of maintainers
-maintainers = ["juliohm"]
+using Test, Pkg, Random
 
 # environment settings
+islinux = Sys.islinux()
 istravis = "TRAVIS" ∈ keys(ENV)
-ismaintainer = "USER" ∈ keys(ENV) && ENV["USER"] ∈ maintainers
 datadir = joinpath(@__DIR__,"data")
+visualtests = !istravis || (istravis && islinux)
+if !istravis
+  Pkg.add("Gtk")
+  using Gtk
+end
 
 # list of tests
 testfiles = [
