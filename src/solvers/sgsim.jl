@@ -40,7 +40,7 @@ or according to a `neighborhood` when the latter is provided.
   @param path = nothing
 end
 
-function GeoStatsBase.preprocess(problem::SimulationProblem, solver::SeqGaussSim)
+function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
   # retrieve problem info
   pdomain = domain(problem)
 
@@ -80,5 +80,5 @@ function GeoStatsBase.preprocess(problem::SimulationProblem, solver::SeqGaussSim
   preprocess(problem, SeqSim(Dict(params)))
 end
 
-GeoStatsBase.solve_single(problem::SimulationProblem, var::Symbol, solver::SeqGaussSim, preproc) =
+solve_single(problem::SimulationProblem, var::Symbol, solver::SeqGaussSim, preproc) =
   solve_single(problem, var, SeqSim(), preproc)

@@ -68,7 +68,7 @@ julia> Kriging()
   @param distance = Euclidean()
 end
 
-function GeoStatsBase.preprocess(problem::EstimationProblem, solver::Kriging)
+function preprocess(problem::EstimationProblem, solver::Kriging)
   # retrieve problem info
   pdomain = domain(problem)
 
@@ -135,7 +135,7 @@ function GeoStatsBase.preprocess(problem::EstimationProblem, solver::Kriging)
   preproc
 end
 
-function GeoStatsBase.solve(problem::EstimationProblem, solver::Kriging)
+function solve(problem::EstimationProblem, solver::Kriging)
   # preprocess user input
   preproc = preprocess(problem, solver)
 
@@ -207,7 +207,7 @@ function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
         zview = view(varμ, nview)
 
         # fit estimator to data
-        krig = GeoStatsBase.fit(estimator, Xview, zview)
+        krig = fit(estimator, Xview, zview)
 
         # save mean and variance
         μ, σ² = predict(krig, xₒ)
@@ -242,7 +242,7 @@ function solve_globally(problem::EstimationProblem, var::Symbol, preproc)
 
     # fit estimator to data
     X, z = valid(pdata, var)
-    krig = GeoStatsBase.fit(estimator, X, z)
+    krig = fit(estimator, X, z)
 
     for location in path
       coordinates!(xₒ, pdomain, location)

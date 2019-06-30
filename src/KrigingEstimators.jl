@@ -13,7 +13,8 @@ using Distributions: Normal
 using Combinatorics: multiexponents
 using StaticArrays: MVector
 
-import GeoStatsBase
+import GeoStatsBase: fit, predict, status
+import GeoStatsBase: preprocess, solve, solve_single
 
 include("estimators.jl")
 
@@ -27,7 +28,7 @@ export
   OrdinaryKriging,
   UniversalKriging,
   ExternalDriftKriging,
-  weights,
+  fit, predict, status, weights,
 
   # solvers
   Kriging, KrigingParam,
