@@ -1,7 +1,13 @@
 using KrigingEstimators
+using GeoStatsBase
+using Variography
 using LinearAlgebra
 using Statistics
+using Plots, VisualRegressionTests
 using Test, Pkg, Random
+
+# workaround GR warnings
+ENV["GKSwstype"] = "100"
 
 # environment settings
 islinux = Sys.islinux()
@@ -13,9 +19,13 @@ if !istravis
   using Gtk
 end
 
+include("dummysolver.jl")
+
 # list of tests
 testfiles = [
-  "estimators.jl"
+  "estimators.jl",
+  "solvers.jl",
+  "comparisons.jl"
 ]
 
 @testset "KrigingEstimators.jl" begin

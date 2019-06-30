@@ -52,7 +52,7 @@ end
 Return the status of the `fittedkrig` object, meaning
 the factorization of the Kriging system was successful.
 """
-status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
+GeoStatsBase.status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
 
 #--------------
 # FITTING STEP
@@ -64,7 +64,7 @@ status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
 Build Kriging system from coordinates `X` and
 values `z` and return a fitted estimator.
 """
-function fit(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
+function GeoStatsBase.fit(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
   # build Kriging system
   LHS = lhs(estimator, X)
   RHS = Vector{eltype(LHS)}(undef, size(LHS,1))
@@ -140,7 +140,7 @@ factorize(estimator::KrigingEstimator, LHS::AbstractMatrix) = error("not impleme
 
 Compute mean and variance for the `estimator` at coordinates `xₒ`.
 """
-predict(estimator::FittedKriging, xₒ::AbstractVector) =
+GeoStatsBase.predict(estimator::FittedKriging, xₒ::AbstractVector) =
   combine(estimator, weights(estimator, xₒ), estimator.state.z)
 
 """

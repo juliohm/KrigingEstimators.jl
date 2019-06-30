@@ -17,7 +17,7 @@ end
 
 OrdinaryKriging(γ) = OrdinaryKriging{typeof(γ)}(γ)
 
-OrdinaryKriging(X, z, γ) = fit(OrdinaryKriging(γ), X, z)
+OrdinaryKriging(X, z, γ) = GeoStatsBase.fit(OrdinaryKriging(γ), X, z)
 
 nconstraints(estimator::OrdinaryKriging) = 1
 

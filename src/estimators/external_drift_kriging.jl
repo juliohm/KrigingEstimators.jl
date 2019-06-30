@@ -27,7 +27,7 @@ end
 
 ExternalDriftKriging(γ, drifts) = ExternalDriftKriging{typeof(γ)}(γ, drifts)
 
-ExternalDriftKriging(X, z, γ, drifts) = fit(ExternalDriftKriging(γ, drifts), X ,z)
+ExternalDriftKriging(X, z, γ, drifts) = GeoStatsBase.fit(ExternalDriftKriging(γ, drifts), X ,z)
 
 nconstraints(estimator::ExternalDriftKriging) = length(estimator.drifts)
 

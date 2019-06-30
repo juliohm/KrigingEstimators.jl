@@ -28,7 +28,7 @@ end
 
 SimpleKriging(γ, μ) = SimpleKriging{typeof(γ),typeof(μ)}(γ, μ)
 
-SimpleKriging(X, z, γ, μ) = fit(SimpleKriging(γ, μ), X, z)
+SimpleKriging(X, z, γ, μ) = GeoStatsBase.fit(SimpleKriging(γ, μ), X, z)
 
 nconstraints(estimator::SimpleKriging) = 0
 
