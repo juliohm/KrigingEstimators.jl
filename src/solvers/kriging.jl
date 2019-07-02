@@ -195,7 +195,7 @@ function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
         coordinates!(xₒ, pdomain, location)
 
         # find neighbors with previously estimated values
-        nneigh = search!(neighbors, xₒ, neighsearcher, estimated)
+        nneigh = search!(neighbors, xₒ, neighsearcher, mask=estimated)
 
         # final set of neighbors
         nview = view(neighbors, 1:nneigh)
