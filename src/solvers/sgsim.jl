@@ -65,15 +65,15 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
     marginal = Normal()
 
     # equivalent parameters for SeqSim solver
-    param = SeqSimParam(estimator=estimator,
-                        neighborhood=varparams.neighborhood,
-                        maxneighbors=varparams.maxneighbors,
-                        marginal=marginal, path=varparams.path)
+    param = (estimator=estimator,
+             neighborhood=varparams.neighborhood,
+             maxneighbors=varparams.maxneighbors,
+             marginal=marginal, path=varparams.path)
 
     push!(params, var => param)
   end
 
-  preprocess(problem, SeqSim(Dict(params)))
+  preprocess(problem, SeqSim(params...))
 end
 
 solve_single(problem::SimulationProblem, var::Symbol, solver::SeqGaussSim, preproc) =
