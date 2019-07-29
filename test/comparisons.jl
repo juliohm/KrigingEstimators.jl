@@ -9,7 +9,7 @@
 
     if visualtests
       @plottest begin
-        gr(size=(600,400))
+        gr(size=(600,600))
         Random.seed!(123)
         compare([solver₁, solver₂], problem2D, VisualComparison())
       end joinpath(datadir,"VisualComparison.png") !istravis

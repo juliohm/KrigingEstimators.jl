@@ -33,6 +33,7 @@ The neighbors are searched according to a `neighborhood`.
   @param degree = nothing
   @param drifts = nothing
   @param neighborhood
+  @param minneighbors = 1
   @param maxneighbors = 10
   @param path = nothing
 end
@@ -64,11 +65,15 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
     # determine marginal distribution
     marginal = Normal()
 
+    # determine simulation path
+    path = varparams.path ≠ nothing ? varparams.path : SimplePath(pdomain)
+
     # equivalent parameters for SeqSim solver
     param = (estimator=estimator,
              neighborhood=varparams.neighborhood,
+             minneighbors=varparams.minneighbors,
              maxneighbors=varparams.maxneighbors,
-             marginal=marginal, path=varparams.path)
+             marginal=marginal, path=path)
 
     push!(params, var => param)
   end
