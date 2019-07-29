@@ -19,24 +19,21 @@ Latter options override former options. For example, by specifying
 `mean`. If no option is specified, Ordinary Kriging is used by
 default with the `variogram` only.
 
+* `neighborhood` - Neighborhood on which to search neighbors
 * `maxneighbors` - Maximum number of neighbors (default to 10)
-* `neighborhood` - Search neighborhood (default to `nothing`)
-* `distance`     - Distance used to find nearest neighbors (default to `Euclidean()`)
 * `path`         - Simulation path (default to `RandomPath`)
 
 For each location in the simulation `path`, a maximum number of
 neighbors `maxneighbors` is used to fit a Gaussian distribution.
-The nearest neighbors are searched according to a `distance`
-or according to a `neighborhood` when the latter is provided.
+The neighbors are searched according to a `neighborhood`.
 """
 @simsolver SeqGaussSim begin
   @param variogram = GaussianVariogram()
   @param mean = nothing
   @param degree = nothing
   @param drifts = nothing
+  @param neighborhood
   @param maxneighbors = 10
-  @param neighborhood = nothing
-  @param distance = Euclidean()
   @param path = nothing
 end
 
@@ -68,11 +65,10 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
     marginal = Normal()
 
     # equivalent parameters for SeqSim solver
-    param = SeqSimParam(estimator=estimator, marginal=marginal,
-                        maxneighbors=varparams.maxneighbors,
+    param = SeqSimParam(estimator=estimator,
                         neighborhood=varparams.neighborhood,
-                        distance=varparams.distance,
-                        path=varparams.path)
+                        maxneighbors=varparams.maxneighbors,
+                        marginal=marginal, path=varparams.path)
 
     push!(params, var => param)
   end

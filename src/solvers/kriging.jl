@@ -63,6 +63,7 @@ julia> Kriging()
   @param mean = nothing
   @param degree = nothing
   @param drifts = nothing
+  @param minneighbors = 1
   @param maxneighbors = nothing
   @param neighborhood = nothing
   @param distance = Euclidean()
@@ -94,7 +95,8 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       estimator = OrdinaryKriging(varparams.variogram)
     end
 
-    # determine maximum number of conditioning neighbors
+    # determine minimum/maximum number of neighbors
+    minneighbors = varparams.minneighbors
     maxneighbors = varparams.maxneighbors
 
     # determine path and neighborhood search method
@@ -104,32 +106,33 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
 
       if varparams.neighborhood ≠ nothing
         # local search with a neighborhood
-        neighborhood = varparams.neighborhood
+        neigh = varparams.neighborhood
 
         # create a path from the data and outwards
         # use at most 10^2 points to generate path
         N = length(varlocs); M = ceil(Int, N/10^2)
         path = SourcePath(pdomain, view(varlocs,1:M:N))
 
-        neighsearcher = LocalNeighborSearcher(pdomain, maxneighbors,
-                                              neighborhood, path)
+        searcher  = NeighborhoodSearcher(pdomain, neigh)
+        bsearcher = BoundedSearcher(searcher, maxneighbors)
       else
         # nearest neighbor search with a distance
         distance = varparams.distance
         path = SimplePath(pdomain)
-        neighsearcher = NearestNeighborSearcher(pdomain, varlocs,
-                                                maxneighbors, distance)
+        bsearcher = NearestNeighborSearcher(pdomain, maxneighbors,
+                                            locations=varlocs, metric=distance)
       end
     else
       # use all data points as neighbors
       path = SimplePath(pdomain)
-      neighsearcher = nothing
+      bsearcher = nothing
     end
 
     # save preprocessed input
     preproc[var] = (estimator=estimator, path=path,
+                    minneighbors=minneighbors,
                     maxneighbors=maxneighbors,
-                    neighsearcher=neighsearcher)
+                    bsearcher=bsearcher)
   end
 
   preproc
@@ -164,7 +167,7 @@ function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
     pdomain = domain(problem)
 
     # unpack preprocessed parameters
-    estimator, path, maxneighbors, neighsearcher = preproc[var]
+    estimator, path, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
     V = variables(problem)[var]
@@ -183,7 +186,7 @@ function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
     # keep track of estimated locations
     estimated = falses(npoints(pdomain))
     for (loc, datloc) in datamap(problem, var)
-      varμ[loc] = value(pdata, datloc, var)
+      varμ[loc] = pdata[datloc,var]
       varσ[loc] = zero(V)
       estimated[loc] = true
     end
@@ -195,7 +198,15 @@ function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
         coordinates!(xₒ, pdomain, location)
 
         # find neighbors with previously estimated values
-        nneigh = search!(neighbors, xₒ, neighsearcher, mask=estimated)
+        nneigh = search!(neighbors, xₒ, bsearcher, mask=estimated)
+
+        # skip location in there are too few neighbors
+        if nneigh < minneighbors
+          varμ[location] = NaN
+          varσ[location] = NaN
+          estimated[location] = true
+          continue
+        end
 
         # final set of neighbors
         nview = view(neighbors, 1:nneigh)
@@ -228,7 +239,7 @@ function solve_globally(problem::EstimationProblem, var::Symbol, preproc)
     pdomain = domain(problem)
 
     # unpack preprocessed parameters
-    estimator, path, maxneighbors, neighsearcher = preproc[var]
+    estimator, path, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
     V = variables(problem)[var]
