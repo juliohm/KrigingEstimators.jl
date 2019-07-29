@@ -92,26 +92,20 @@
   end
 
   @testset "CookieCutter" begin
-    nreals = 3
-
-    problem = SimulationProblem(grid2D, (:facies => Int, :property => Float64), nreals)
-
-    solver₁ = CookieCutter(Dummy(:facies => NamedTuple()), [0 => Dummy(), 1 => Dummy()])
+    problem = SimulationProblem(grid2D, (:facies => Int, :property => Float64), 3)
 
     γ₀ = GaussianVariogram(distance=Ellipsoidal([30.,10.],[0.]))
     γ₁ = GaussianVariogram(distance=Ellipsoidal([10.,30.],[0.]))
-    solver₂ = CookieCutter(Dummy(:facies => NamedTuple()),
-                           [0 => SeqGaussSim(:property => (variogram=γ₀,neighborhood=BallNeighborhood(10.))),
-                            1 => SeqGaussSim(:property => (variogram=γ₁,neighborhood=BallNeighborhood(10.)))])
+    solver = CookieCutter(Dummy(:facies => NamedTuple()),
+                          [0 => SeqGaussSim(:property => (variogram=γ₀,neighborhood=BallNeighborhood(10.))),
+                           1 => SeqGaussSim(:property => (variogram=γ₁,neighborhood=BallNeighborhood(10.)))])
 
     Random.seed!(1234)
-    solution₁ = solve(problem, solver₁)
-    solution₂ = solve(problem, solver₂)
+    solution = solve(problem, solver)
 
     if visualtests
-      gr(size=(800,400))
-      @plottest plot(solution₁) joinpath(datadir,"CookieCutter1.png") !istravis
-      @plottest plot(solution₂) joinpath(datadir,"CookieCutter2.png") !istravis
+      gr(size=(800,600))
+      @plottest plot(solution) joinpath(datadir,"CookieCutter.png") !istravis
     end
   end
 end

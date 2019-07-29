@@ -19,7 +19,8 @@ if !istravis
   using Gtk
 end
 
-include("dummysolver.jl")
+# dummy variables for testing
+include("dummy.jl")
 
 # list of tests
 testfiles = [
