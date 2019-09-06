@@ -90,22 +90,4 @@
       @plottest plot(solution) joinpath(datadir,"SGSUncond2D.png") !istravis
     end
   end
-
-  @testset "CookieCutter" begin
-    problem = SimulationProblem(grid2D, (:facies => Int, :property => Float64), 3)
-
-    γ₀ = GaussianVariogram(distance=Ellipsoidal([30.,10.],[0.]))
-    γ₁ = GaussianVariogram(distance=Ellipsoidal([10.,30.],[0.]))
-    solver = CookieCutter(Dummy(:facies => NamedTuple()),
-                          [0 => SeqGaussSim(:property => (variogram=γ₀,neighborhood=BallNeighborhood(10.))),
-                           1 => SeqGaussSim(:property => (variogram=γ₁,neighborhood=BallNeighborhood(10.)))])
-
-    Random.seed!(1234)
-    solution = solve(problem, solver)
-
-    if visualtests
-      gr(size=(800,600))
-      @plottest plot(solution) joinpath(datadir,"CookieCutter.png") !istravis
-    end
-  end
 end

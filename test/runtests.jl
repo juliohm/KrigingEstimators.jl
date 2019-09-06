@@ -25,8 +25,7 @@ include("dummy.jl")
 # list of tests
 testfiles = [
   "estimators.jl",
-  "solvers.jl",
-  "comparisons.jl"
+  "solvers.jl"
 ]
 
 @testset "KrigingEstimators.jl" begin
