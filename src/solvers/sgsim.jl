@@ -66,7 +66,7 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
     marginal = Normal()
 
     # determine simulation path
-    path = varparams.path ≠ nothing ? varparams.path : SimplePath(pdomain)
+    path = varparams.path ≠ nothing ? varparams.path : LinearPath(pdomain)
 
     # equivalent parameters for SeqSim solver
     param = (estimator=estimator,

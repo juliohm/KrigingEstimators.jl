@@ -118,13 +118,13 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       else
         # nearest neighbor search with a distance
         distance = varparams.distance
-        path = SimplePath(pdomain)
+        path = LinearPath(pdomain)
         bsearcher = NearestNeighborSearcher(pdomain, maxneighbors,
                                             locations=varlocs, metric=distance)
       end
     else
       # use all data points as neighbors
-      path = SimplePath(pdomain)
+      path = LinearPath(pdomain)
       bsearcher = nothing
     end
 
