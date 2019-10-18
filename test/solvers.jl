@@ -39,55 +39,55 @@
         solution, sname = solutions1D[i], snames[i]
         @plottest plot(solution) joinpath(datadir,sname*"1D.png") !istravis
       end
-      for (solution, sname) in zip(solutions2D, snames)
+      for i in 1:2
+        solution, sname = solutions2D[i], snames[i]
         @plottest contourf(solution) joinpath(datadir,sname*"2D.png") !istravis
       end
+      # TODO: test local_kriging
     end
   end
 
   @testset "SeqGaussSim" begin
     nreals = 3
 
-    ###################
-    ##  CONDITIONAL  ##
-    ###################
-    problem = SimulationProblem(data2D, grid2D, :value, nreals)
+    @testset "Conditional" begin
+      problem = SimulationProblem(data2D, grid2D, :value, nreals)
 
-    solver = SeqGaussSim(
-      :value => (variogram=GaussianVariogram(range=35.),
-                 neighborhood=BallNeighborhood(10.))
-    )
+      solver = SeqGaussSim(
+        :value => (variogram=GaussianVariogram(range=35.),
+                   neighborhood=BallNeighborhood(10.))
+      )
 
-    Random.seed!(2017)
-    solution = solve(problem, solver)
+      Random.seed!(2017)
+      solution = solve(problem, solver)
 
-    # basic checks
-    reals = solution[:value]
-    @test all(reals[i][26,26] == 1. for i in 1:nreals)
-    @test all(reals[i][51,76] == 0. for i in 1:nreals)
-    @test all(reals[i][76,51] == 1. for i in 1:nreals)
+      # basic checks
+      reals = solution[:value]
+      @test all(reals[i][26,26] == 1. for i in 1:nreals)
+      @test all(reals[i][51,76] == 0. for i in 1:nreals)
+      @test all(reals[i][76,51] == 1. for i in 1:nreals)
 
-    if visualtests
-      gr(size=(800,400))
-      @plottest plot(solution) joinpath(datadir,"SGSCond2D.png") !istravis
+      if visualtests
+        gr(size=(800,400))
+        # @plottest plot(solution) joinpath(datadir,"SGSCond2D.png") !istravis
+      end
     end
 
-    ###################
-    ## UNCONDITIONAL ##
-    ###################
-    problem = SimulationProblem(grid2D, :value => Float64, nreals)
+    @testset "Unconditional" begin
+      problem = SimulationProblem(grid2D, :value => Float64, nreals)
 
-    solver = SeqGaussSim(
-      :value => (variogram=GaussianVariogram(range=35.),
-                 neighborhood=BallNeighborhood(10.))
-    )
+      solver = SeqGaussSim(
+        :value => (variogram=GaussianVariogram(range=35.),
+                   neighborhood=BallNeighborhood(10.))
+      )
 
-    Random.seed!(2017)
-    solution = solve(problem, solver)
+      Random.seed!(2017)
+      solution = solve(problem, solver)
 
-    if visualtests
-      gr(size=(800,400))
-      @plottest plot(solution) joinpath(datadir,"SGSUncond2D.png") !istravis
+      if visualtests
+        gr(size=(800,400))
+        # @plottest plot(solution) joinpath(datadir,"SGSUncond2D.png") !istravis
+      end
     end
   end
 end
