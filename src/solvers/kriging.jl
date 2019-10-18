@@ -144,14 +144,13 @@ function solve(problem::EstimationProblem, solver::Kriging)
 
   # results for each variable
   μs = []; σs = []
-
   for (var, V) in variables(problem)
     if preproc[var].maxneighbors ≠ nothing
       # perform Kriging with reduced number of neighbors
-      varμ, varσ = solve_locally(problem, var, preproc)
+      varμ, varσ = solve_approx(problem, var, preproc)
     else
       # perform Kriging with all data points as neighbors
-      varμ, varσ = solve_globally(problem, var, preproc)
+      varμ, varσ = solve_exact(problem, var, preproc)
     end
 
     push!(μs, var => varμ)
@@ -161,7 +160,7 @@ function solve(problem::EstimationProblem, solver::Kriging)
   EstimationSolution(domain(problem), Dict(μs), Dict(σs))
 end
 
-function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
+function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve problem info
     pdata = data(problem)
     pdomain = domain(problem)
@@ -233,7 +232,7 @@ function solve_locally(problem::EstimationProblem, var::Symbol, preproc)
     varμ, varσ
 end
 
-function solve_globally(problem::EstimationProblem, var::Symbol, preproc)
+function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve problem info
     pdata = data(problem)
     pdomain = domain(problem)
