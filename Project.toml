@@ -18,7 +18,7 @@ Combinatorics = "^0.7"
 Distances = "^0.8"
 Distributions = "^0.21"
 GeoStatsBase = "^0.6"
-StaticArrays = "^0.11"
+StaticArrays = "^0.12"
 Variography = "^0.4"
 julia = "1"
 
