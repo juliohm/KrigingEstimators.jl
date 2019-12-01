@@ -14,16 +14,21 @@
     nearest_kriging = Kriging(
       :value => (variogram=GaussianVariogram(range=35.,nugget=0.), maxneighbors=3)
     )
-    local_kriging = Kriging(
+    local_kriging1D = Kriging(
       :value => (variogram=GaussianVariogram(range=35.,nugget=0.),
-                 maxneighbors=3, neighborhood=BallNeighborhood(100.))
+                 maxneighbors=3, neighborhood=BallNeighborhood{1}(100.))
+    )
+    local_kriging2D = Kriging(
+      :value => (variogram=GaussianVariogram(range=35.,nugget=0.),
+                 maxneighbors=3, neighborhood=BallNeighborhood{2}(100.))
     )
 
-    solvers = [global_kriging, nearest_kriging, local_kriging]
-    snames  = ["GlobalKriging", "NearestKriging", "LocalKriging"]
+    solvers1D = [global_kriging, nearest_kriging, local_kriging1D]
+    solvers2D = [global_kriging, nearest_kriging, local_kriging2D]
+    snames    = ["GlobalKriging", "NearestKriging", "LocalKriging"]
 
-    solutions1D = [solve(problem1D, solver) for solver in solvers]
-    solutions2D = [solve(problem2D, solver) for solver in solvers]
+    solutions1D = [solve(problem1D, solver) for solver in solvers1D]
+    solutions2D = [solve(problem2D, solver) for solver in solvers2D]
 
     # basic checks
     for solution in solutions2D
@@ -55,7 +60,7 @@
 
       solver = SeqGaussSim(
         :value => (variogram=GaussianVariogram(range=35.),
-                   neighborhood=BallNeighborhood(10.))
+                   neighborhood=BallNeighborhood{2}(10.))
       )
 
       Random.seed!(2017)
@@ -78,7 +83,7 @@
 
       solver = SeqGaussSim(
         :value => (variogram=GaussianVariogram(range=35.),
-                   neighborhood=BallNeighborhood(10.))
+                   neighborhood=BallNeighborhood{2}(10.))
       )
 
       Random.seed!(2017)
