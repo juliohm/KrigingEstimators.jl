@@ -24,7 +24,7 @@ Get the latest stable release with Julia's package manager:
 
 ## Usage
 
-This package is part of the [GeoStats.jl](https://github.com/juliohm/GeoStats.jl) framework.
+This package is part of the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
 
 For examples of usage, please check the main documentation.
 
@@ -32,8 +32,8 @@ For examples of usage, please check the main documentation.
 
 If you have any questions, please contact our community on the [gitter channel](https://gitter.im/JuliaEarth/GeoStats.jl).
 
-[travis-img]: https://travis-ci.org/juliohm/KrigingEstimators.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/juliohm/KrigingEstimators.jl
+[travis-img]: https://travis-ci.org/JuliaEarth/KrigingEstimators.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/JuliaEarth/KrigingEstimators.jl
 
-[codecov-img]: https://codecov.io/gh/juliohm/KrigingEstimators.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/juliohm/KrigingEstimators.jl
+[codecov-img]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl
