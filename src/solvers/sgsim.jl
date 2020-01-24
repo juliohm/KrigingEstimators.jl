@@ -81,5 +81,5 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
   preprocess(problem, SeqSim(params...))
 end
 
-solve_single(problem::SimulationProblem, var::Symbol, solver::SeqGaussSim, preproc) =
-  solve_single(problem, var, SeqSim(), preproc)
+solvesingle(problem::SimulationProblem, var::Symbol, solver::SeqGaussSim, preproc) =
+  solvesingle(problem, var, SeqSim(), preproc)

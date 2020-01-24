@@ -14,7 +14,7 @@ using Combinatorics: multiexponents
 using StaticArrays: MVector
 
 import GeoStatsBase: fit, predict, status
-import GeoStatsBase: preprocess, solve, solve_single
+import GeoStatsBase: preprocess, solve, solvesingle
 
 include("estimators.jl")
 
