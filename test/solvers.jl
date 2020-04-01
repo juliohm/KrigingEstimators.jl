@@ -33,9 +33,9 @@
     # basic checks
     for solution in solutions2D
       M, V = solution[:value]
-      @test M[26,26] == 1.
-      @test M[51,76] == 0.
-      @test M[76,51] == 1.
+      @test M[26,26] ≈ 1.
+      @test M[51,76] ≈ 0.
+      @test M[76,51] ≈ 1.
     end
 
     if visualtests
