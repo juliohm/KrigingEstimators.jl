@@ -33,9 +33,9 @@
     # basic checks
     for solution in solutions2D
       M, V = solution[:value]
-      @test M[26,26] ≈ 1.
-      @test M[51,76] ≈ 0.
-      @test M[76,51] ≈ 1.
+      @test isapprox(M[26,26], 1., atol=1e-6)
+      @test isapprox(M[51,76], 0., atol=1e-6)
+      @test isapprox(M[76,51], 1., atol=1e-6)
     end
 
     if visualtests
