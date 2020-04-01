@@ -43,43 +43,42 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
   pdomain = domain(problem)
 
   params = []
-  for (var, V) in variables(problem)
-    # get user parameters
-    if var ∈ keys(solver.params)
-      varparams = solver.params[var]
-    else
-      varparams = SeqGaussSimParam()
+  for covars in covariables(problem, solver)
+    for var in covars.names
+      # get user parameters
+      varparams = covars.params[(var,)]
+
+      # determine which Kriging variant to use
+      if varparams.drifts ≠ nothing
+        estimator = ExternalDriftKriging(varparams.variogram, varparams.drifts)
+      elseif varparams.degree ≠ nothing
+        estimator = UniversalKriging(varparams.variogram, varparams.degree, ndims(pdomain))
+      elseif varparams.mean ≠ nothing
+        estimator = SimpleKriging(varparams.variogram, varparams.mean)
+      else
+        estimator = OrdinaryKriging(varparams.variogram)
+      end
+
+      # determine marginal distribution
+      marginal = Normal()
+
+      # determine simulation path
+      path = varparams.path ≠ nothing ? varparams.path : LinearPath(pdomain)
+
+      # equivalent parameters for SeqSim solver
+      param = (estimator=estimator,
+               neighborhood=varparams.neighborhood,
+               minneighbors=varparams.minneighbors,
+               maxneighbors=varparams.maxneighbors,
+               marginal=marginal, path=path)
+
+      push!(params, var => param)
     end
-
-    # determine which Kriging variant to use
-    if varparams.drifts ≠ nothing
-      estimator = ExternalDriftKriging(varparams.variogram, varparams.drifts)
-    elseif varparams.degree ≠ nothing
-      estimator = UniversalKriging(varparams.variogram, varparams.degree, ndims(pdomain))
-    elseif varparams.mean ≠ nothing
-      estimator = SimpleKriging(varparams.variogram, varparams.mean)
-    else
-      estimator = OrdinaryKriging(varparams.variogram)
-    end
-
-    # determine marginal distribution
-    marginal = Normal()
-
-    # determine simulation path
-    path = varparams.path ≠ nothing ? varparams.path : LinearPath(pdomain)
-
-    # equivalent parameters for SeqSim solver
-    param = (estimator=estimator,
-             neighborhood=varparams.neighborhood,
-             minneighbors=varparams.minneighbors,
-             maxneighbors=varparams.maxneighbors,
-             marginal=marginal, path=path)
-
-    push!(params, var => param)
   end
 
   preprocess(problem, SeqSim(params...))
 end
 
-solvesingle(problem::SimulationProblem, var::Symbol, solver::SeqGaussSim, preproc) =
-  solvesingle(problem, var, SeqSim(), preproc)
+solvesingle(problem::SimulationProblem, covars::NamedTuple,
+            solver::SeqGaussSim, preproc) =
+  solvesingle(problem, covars, SeqSim(), preproc)

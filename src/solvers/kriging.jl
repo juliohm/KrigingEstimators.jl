@@ -76,63 +76,61 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
   # result of preprocessing
   preproc = Dict{Symbol,NamedTuple}()
 
-  for (var, V) in variables(problem)
-    # get user parameters
-    if var ∈ keys(solver.params)
-      varparams = solver.params[var]
-    else
-      varparams = KrigingParam()
-    end
+  for covars in covariables(problem, solver)
+    for var in covars.names
+      # get user parameters
+      varparams = covars.params[(var,)]
 
-    # determine which Kriging variant to use
-    if varparams.drifts ≠ nothing
-      estimator = ExternalDriftKriging(varparams.variogram, varparams.drifts)
-    elseif varparams.degree ≠ nothing
-      estimator = UniversalKriging(varparams.variogram, varparams.degree, ndims(pdomain))
-    elseif varparams.mean ≠ nothing
-      estimator = SimpleKriging(varparams.variogram, varparams.mean)
-    else
-      estimator = OrdinaryKriging(varparams.variogram)
-    end
-
-    # determine minimum/maximum number of neighbors
-    minneighbors = varparams.minneighbors
-    maxneighbors = varparams.maxneighbors
-
-    # determine path and neighborhood search method
-    if varparams.maxneighbors ≠ nothing
-      # locations with data for variable
-      varlocs = collect(keys(datamap(problem, var)))
-
-      if varparams.neighborhood ≠ nothing
-        # local search with a neighborhood
-        neigh = varparams.neighborhood
-
-        # create a path from the data and outwards
-        # use at most 10^2 points to generate path
-        N = length(varlocs); M = ceil(Int, N/10^2)
-        path = SourcePath(pdomain, view(varlocs,1:M:N))
-
-        searcher  = NeighborhoodSearcher(pdomain, neigh)
-        bsearcher = BoundedSearcher(searcher, maxneighbors)
+      # determine which Kriging variant to use
+      if varparams.drifts ≠ nothing
+        estimator = ExternalDriftKriging(varparams.variogram, varparams.drifts)
+      elseif varparams.degree ≠ nothing
+        estimator = UniversalKriging(varparams.variogram, varparams.degree, ndims(pdomain))
+      elseif varparams.mean ≠ nothing
+        estimator = SimpleKriging(varparams.variogram, varparams.mean)
       else
-        # nearest neighbor search with a distance
-        distance = varparams.distance
-        path = LinearPath(pdomain)
-        bsearcher = NearestNeighborSearcher(pdomain, maxneighbors,
-                                            locations=varlocs, metric=distance)
+        estimator = OrdinaryKriging(varparams.variogram)
       end
-    else
-      # use all data points as neighbors
-      path = LinearPath(pdomain)
-      bsearcher = nothing
-    end
 
-    # save preprocessed input
-    preproc[var] = (estimator=estimator, path=path,
-                    minneighbors=minneighbors,
-                    maxneighbors=maxneighbors,
-                    bsearcher=bsearcher)
+      # determine minimum/maximum number of neighbors
+      minneighbors = varparams.minneighbors
+      maxneighbors = varparams.maxneighbors
+
+      # determine path and neighborhood search method
+      if varparams.maxneighbors ≠ nothing
+        # locations with data for variable
+        varlocs = collect(keys(datamap(problem, var)))
+
+        if varparams.neighborhood ≠ nothing
+          # local search with a neighborhood
+          neigh = varparams.neighborhood
+
+          # create a path from the data and outwards
+          # use at most 10^2 points to generate path
+          N = length(varlocs); M = ceil(Int, N/10^2)
+          path = SourcePath(pdomain, view(varlocs,1:M:N))
+
+          searcher  = NeighborhoodSearcher(pdomain, neigh)
+          bsearcher = BoundedSearcher(searcher, maxneighbors)
+        else
+          # nearest neighbor search with a distance
+          distance = varparams.distance
+          path = LinearPath(pdomain)
+          bsearcher = NearestNeighborSearcher(pdomain, maxneighbors,
+                                              locations=varlocs, metric=distance)
+        end
+      else
+        # use all data points as neighbors
+        path = LinearPath(pdomain)
+        bsearcher = nothing
+      end
+
+      # save preprocessed input
+      preproc[var] = (estimator=estimator, path=path,
+                      minneighbors=minneighbors,
+                      maxneighbors=maxneighbors,
+                      bsearcher=bsearcher)
+    end
   end
 
   preproc
