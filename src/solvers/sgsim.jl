@@ -21,7 +21,7 @@ default with the `variogram` only.
 
 * `neighborhood` - Neighborhood on which to search neighbors
 * `maxneighbors` - Maximum number of neighbors (default to 10)
-* `path`         - Simulation path (default to `RandomPath`)
+* `path`         - Simulation path (default to `LinearPath()`)
 
 For each location in the simulation `path`, a maximum number of
 neighbors `maxneighbors` is used to fit a Gaussian distribution.
@@ -63,7 +63,7 @@ function preprocess(problem::SimulationProblem, solver::SeqGaussSim)
       marginal = Normal()
 
       # determine simulation path
-      path = varparams.path ≠ nothing ? varparams.path : LinearPath(pdomain)
+      path = varparams.path ≠ nothing ? varparams.path : LinearPath()
 
       # equivalent parameters for SeqSim solver
       param = (estimator=estimator,

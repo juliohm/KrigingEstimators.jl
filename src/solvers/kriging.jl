@@ -108,20 +108,20 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
           # create a path from the data and outwards
           # use at most 10^2 points to generate path
           N = length(varlocs); M = ceil(Int, N/10^2)
-          path = SourcePath(pdomain, view(varlocs,1:M:N))
+          path = SourcePath(view(varlocs,1:M:N))
 
           searcher  = NeighborhoodSearcher(pdomain, neigh)
           bsearcher = BoundedSearcher(searcher, maxneighbors)
         else
           # nearest neighbor search with a distance
           distance = varparams.distance
-          path = LinearPath(pdomain)
+          path = LinearPath()
           bsearcher = NearestNeighborSearcher(pdomain, maxneighbors,
                                               locations=varlocs, metric=distance)
         end
       else
         # use all data points as neighbors
-        path = LinearPath(pdomain)
+        path = LinearPath()
         bsearcher = nothing
       end
 
@@ -189,7 +189,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     end
 
     # estimation loop
-    for location in path
+    for location in traverse(pdomain, path)
       if !estimated[location]
         # coordinates of neighborhood center
         coordinates!(xₒ, pdomain, location)
@@ -252,7 +252,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     X, z = valid(pdata, var)
     krig = fit(estimator, X, z)
 
-    for location in path
+    for location in traverse(pdomain, path)
       coordinates!(xₒ, pdomain, location)
 
       μ, σ² = predict(krig, xₒ)
