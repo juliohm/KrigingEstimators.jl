@@ -1,7 +1,7 @@
 name = "KrigingEstimators"
 uuid = "d293930c-a38c-56c5-8ebb-12008647b47a"
 author = "Júlio Hoffimann <julio.hoffimann@gmail.com>"
-version = "0.3.8"
+version = "0.3.9"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
