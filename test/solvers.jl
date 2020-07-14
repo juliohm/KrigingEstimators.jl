@@ -1,6 +1,6 @@
 @testset "Solvers" begin
-  data1D = readgeotable(joinpath(datadir,"data1D.tsv"), delim='\t', coordnames=[:x])
-  data2D = readgeotable(joinpath(datadir,"data2D.tsv"), delim='\t', coordnames=[:x,:y])
+  data1D = readgeotable(joinpath(datadir,"data1D.tsv"), coordnames=(:x,))
+  data2D = readgeotable(joinpath(datadir,"data2D.tsv"), coordnames=(:x,:y))
   grid1D = RegularGrid(100)
   grid2D = RegularGrid(100,100)
 
@@ -14,28 +14,24 @@
     nearest_kriging = Kriging(
       :value => (variogram=GaussianVariogram(range=35.,nugget=0.), maxneighbors=3)
     )
-    local_kriging1D = Kriging(
+    local_kriging = Kriging(
       :value => (variogram=GaussianVariogram(range=35.,nugget=0.),
-                 maxneighbors=3, neighborhood=BallNeighborhood{1}(100.))
-    )
-    local_kriging2D = Kriging(
-      :value => (variogram=GaussianVariogram(range=35.,nugget=0.),
-                 maxneighbors=3, neighborhood=BallNeighborhood{2}(100.))
+                 maxneighbors=3, neighborhood=BallNeighborhood(100.))
     )
 
-    solvers1D = [global_kriging, nearest_kriging, local_kriging1D]
-    solvers2D = [global_kriging, nearest_kriging, local_kriging2D]
-    snames    = ["GlobalKriging", "NearestKriging", "LocalKriging"]
+    solvers = [global_kriging, nearest_kriging, local_kriging]
+    snames  = ["GlobalKriging", "NearestKriging", "LocalKriging"]
 
-    solutions1D = [solve(problem1D, solver) for solver in solvers1D]
-    solutions2D = [solve(problem2D, solver) for solver in solvers2D]
+    solutions1D = [solve(problem1D, solver) for solver in solvers]
+    solutions2D = [solve(problem2D, solver) for solver in solvers]
 
     # basic checks
+    inds = LinearIndices(size(grid2D))
     for solution in solutions2D
       M, V = solution[:value]
-      @test isapprox(M[26,26], 1., atol=1e-6)
-      @test isapprox(M[51,76], 0., atol=1e-6)
-      @test isapprox(M[76,51], 1., atol=1e-6)
+      @test isapprox(M[inds[26,26]], 1., atol=1e-6)
+      @test isapprox(M[inds[51,76]], 0., atol=1e-6)
+      @test isapprox(M[inds[76,51]], 1., atol=1e-6)
     end
 
     if visualtests
@@ -60,7 +56,7 @@
 
       solver = SeqGaussSim(
         :value => (variogram=GaussianVariogram(range=35.),
-                   neighborhood=BallNeighborhood{2}(10.))
+                   neighborhood=BallNeighborhood(10.))
       )
 
       Random.seed!(2017)
@@ -68,9 +64,10 @@
 
       # basic checks
       reals = solution[:value]
-      @test all(reals[i][26,26] == 1. for i in 1:nreals)
-      @test all(reals[i][51,76] == 0. for i in 1:nreals)
-      @test all(reals[i][76,51] == 1. for i in 1:nreals)
+      inds = LinearIndices(size(grid2D))
+      @test all(reals[i][inds[26,26]] == 1. for i in 1:nreals)
+      @test all(reals[i][inds[51,76]] == 0. for i in 1:nreals)
+      @test all(reals[i][inds[76,51]] == 1. for i in 1:nreals)
 
       if visualtests
         gr(size=(800,400))
@@ -83,7 +80,7 @@
 
       solver = SeqGaussSim(
         :value => (variogram=GaussianVariogram(range=35.),
-                   neighborhood=BallNeighborhood{2}(10.))
+                   neighborhood=BallNeighborhood(10.))
       )
 
       Random.seed!(2017)
