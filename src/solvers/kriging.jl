@@ -111,7 +111,12 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
           path = SourcePath(view(varlocs,1:M:N))
 
           searcher  = NeighborhoodSearcher(pdomain, neigh)
-          bsearcher = BoundedSearcher(searcher, maxneighbors)
+          if neigh isa BallNeighborhood
+            #for specialised knn and ball search combined
+            bsearcher = KBallSearcher(searcher,maxneighbors)
+          else
+            bsearcher = BoundedSearcher(searcher, maxneighbors)
+          end
         else
           # nearest neighbor search with a distance
           distance = varparams.distance
