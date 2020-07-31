@@ -108,13 +108,14 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
           # create a path from the data and outwards
           # use at most 10^2 points to generate path
           N = length(varlocs); M = ceil(Int, N/10^2)
-          path = SourcePath(view(varlocs,1:M:N))
 
-          searcher  = NeighborhoodSearcher(pdomain, neigh)
           if neigh isa BallNeighborhood
             #for specialised knn and ball search combined
-            bsearcher = KBallSearcher(searcher,maxneighbors)
+            path = LinearPath()
+            bsearcher = KBallSearcher(pdomain, maxneighbors,neigh,locations=varlocs)
           else
+            path = SourcePath(view(varlocs,1:M:N))
+            searcher  = NeighborhoodSearcher(pdomain, neigh)
             bsearcher = BoundedSearcher(searcher, maxneighbors)
           end
         else
