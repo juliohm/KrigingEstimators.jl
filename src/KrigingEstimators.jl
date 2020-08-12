@@ -7,7 +7,7 @@ module KrigingEstimators
 using GeoStatsBase
 using Variography
 
-using LinearAlgebra: Factorization, Symmetric, bunchkaufman, lu, cholesky, issuccess, ⋅
+using LinearAlgebra: Factorization, lu, cholesky, issuccess, ⋅
 using Distances: Euclidean
 using Distributions: Normal
 using Combinatorics: multiexponents
