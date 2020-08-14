@@ -248,8 +248,13 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     # pre-allocate memory for coordinates
     xₒ = MVector{ndims(pdomain),coordtype(pdomain)}(undef)
 
-    # fit estimator to data
-    X, z = valid(pdata, var)
+    # retrieve non-missing data
+    locs = findall(!ismissing, pdata[var])
+    𝒟 = view(pdata, locs)
+    X = coordinates(𝒟)
+    z = 𝒟[var]
+
+    # fit estimator once
     krig = fit(estimator, X, z)
 
     for location in traverse(pdomain, path)
