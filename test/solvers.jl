@@ -5,7 +5,7 @@
   grid2D = RegularGrid(100,100)
 
   @testset "Kriging1D" begin
-    problem1D = EstimationProblem(data1D, grid1D, :value)
+    problem = EstimationProblem(data1D, grid1D, :value)
 
     global_kriging = Kriging(
       :value => (variogram=GaussianVariogram(range=35.,nugget=0.),)
@@ -18,32 +18,72 @@
                  maxneighbors=3, neighborhood=BallNeighborhood(100.))
     )
 
-    solvers = [global_kriging, nearest_kriging, local_kriging]
-    snames  = ["GlobalKriging", "NearestKriging", "LocalKriging"]
-
-    solutions1D = [solve(problem1D, solver) for solver in solvers]
+    solvers   = [global_kriging, nearest_kriging, local_kriging]
+    solnames  = ["GlobalKriging", "NearestKriging", "LocalKriging"]
+    solutions = [solve(problem, solver) for solver in solvers]
 
     if visualtests
       gr(size=(800,400))
-      for i in 1:2
-        solution, sname = solutions1D[i], snames[i]
+      for i in 1:3
+        solution, sname = solutions[i], solnames[i]
         @plottest plot(solution) joinpath(datadir,sname*"1D.png") !istravis
       end
-      # TODO: test local_kriging
     end
   end
 
-  @testset "Kriging2D_local_kriging" begin
-    problem2D = EstimationProblem(data2D, grid2D, :value)
+  @testset "GlobalKriging2D" begin
+    problem = EstimationProblem(data2D, grid2D, :value)
+
+    solver = Kriging(
+      :value => (variogram=GaussianVariogram(range=35.,nugget=0.),)
+    )
+
+    solution = solve(problem, solver)
+
+    # basic checks
+    inds = LinearIndices(size(grid2D))
+    M, V = solution[:value]
+    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
+    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
+    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
+
+    if visualtests
+      gr(size=(800,400))
+      @plottest contourf(solution) joinpath(datadir,"GlobalKriging2D.png") !istravis
+    end
+  end
+
+  @testset "NearestKriging2D" begin
+    problem = EstimationProblem(data2D, grid2D, :value)
+
+    solver = Kriging(
+      :value => (variogram=GaussianVariogram(range=35.,nugget=0.), maxneighbors=3)
+    )
+
+    solution = solve(problem, solver)
+
+    # basic checks
+    inds = LinearIndices(size(grid2D))
+    M, V = solution[:value]
+    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
+    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
+    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
+
+    if visualtests
+      gr(size=(800,400))
+      @plottest contourf(solution) joinpath(datadir,"NearestKriging2D.png") !istravis
+    end
+  end
+
+  @testset "LocalKriging2D" begin
+    problem = EstimationProblem(data2D, grid2D, :value)
 
     solver = Kriging(
       :value => (variogram=GaussianVariogram(range=35.,nugget=0.),
                  maxneighbors=3, neighborhood=BallNeighborhood(100.))
     )
 
-    sname  = "LocalKriging"
-
-    solution = solve(problem2D, solver)
+    solution = solve(problem, solver)
 
     # basic checks
     inds = LinearIndices(size(grid2D))
@@ -54,56 +94,7 @@
 
     if visualtests
       gr(size=(800,400))
-      @plottest contourf(solution) joinpath(datadir,sname*"2D.png") !istravis
-      # TODO: test local_kriging
-    end
-  end
-
-  @testset "Kriging2D_global" begin
-    problem2D = EstimationProblem(data2D, grid2D, :value)
-
-    solver = Kriging(
-      :value => (variogram=GaussianVariogram(range=35.,nugget=0.),)
-    )
-    sname  = "GlobalKriging"
-
-    solution = solve(problem2D, solver)
-
-    # basic checks
-    inds = LinearIndices(size(grid2D))
-    M, V = solution[:value]
-    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
-    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
-    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
-
-    if visualtests
-      gr(size=(800,400))
-      @plottest contourf(solution) joinpath(datadir,sname*"2D.png") !istravis
-      # TODO: test local_kriging
-    end
-  end
-
-  @testset "Kriging2D_nearest_kriging" begin
-    problem2D = EstimationProblem(data2D, grid2D, :value)
-
-    solver = Kriging(
-      :value => (variogram=GaussianVariogram(range=35.,nugget=0.), maxneighbors=3)
-    )
-    sname  = "NearestKriging"
-
-    solution = solve(problem2D, solver)
-
-    # basic checks
-    inds = LinearIndices(size(grid2D))
-    M, V = solution[:value]
-    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
-    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
-    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
-
-    if visualtests
-      gr(size=(800,400))
-      @plottest contourf(solution) joinpath(datadir,sname*"2D.png") !istravis
-      # TODO: test local_kriging
+      @plottest contourf(solution) joinpath(datadir,"LocalKriging2D.png") !istravis
     end
   end
 
