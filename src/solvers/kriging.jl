@@ -97,7 +97,7 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       minneighbors = varparams.minneighbors
       maxneighbors = varparams.maxneighbors
 
-      # determine path and neighborhood search method
+      # determine neighborhood search method
       if varparams.maxneighbors ≠ nothing
         if varparams.neighborhood ≠ nothing
           # local search with a neighborhood
@@ -120,8 +120,7 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       end
 
       # save preprocessed input
-      path = LinearPath()
-      preproc[var] = (estimator=estimator, path=path,
+      preproc[var] = (estimator=estimator,
                       minneighbors=minneighbors,
                       maxneighbors=maxneighbors,
                       bsearcher=bsearcher)
@@ -159,7 +158,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     pdomain = domain(problem)
 
     # unpack preprocessed parameters
-    estimator, path, minneighbors, maxneighbors, bsearcher = preproc[var]
+    estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
     V = variables(problem)[var]
@@ -176,7 +175,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     X = Matrix{coordtype(pdomain)}(undef, ndims(pdomain), maxneighbors)
 
     # estimation loop
-    for location in traverse(pdomain, path)
+    for location in traverse(pdomain, LinearPath())
       # coordinates of neighborhood center
       coordinates!(xₒ, pdomain, location)
 
@@ -216,7 +215,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     pdomain = domain(problem)
 
     # unpack preprocessed parameters
-    estimator, path, minneighbors, maxneighbors, bsearcher = preproc[var]
+    estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
     V = variables(problem)[var]
@@ -232,7 +231,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     X, z = valid(pdata, var)
     krig = fit(estimator, X, z)
 
-    for location in traverse(pdomain, path)
+    for location in traverse(pdomain, LinearPath())
       coordinates!(xₒ, pdomain, location)
 
       μ, σ² = predict(krig, xₒ)
