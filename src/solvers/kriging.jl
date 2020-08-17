@@ -72,6 +72,7 @@ end
 function preprocess(problem::EstimationProblem, solver::Kriging)
   # retrieve problem info
   pdomain = domain(problem)
+  pdata = data(problem)
 
   # result of preprocessing
   preproc = Dict{Symbol,NamedTuple}()
@@ -96,37 +97,30 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       minneighbors = varparams.minneighbors
       maxneighbors = varparams.maxneighbors
 
-      # determine path and neighborhood search method
+      # determine neighborhood search method
       if varparams.maxneighbors ≠ nothing
-        # locations with data for variable
-        varlocs = collect(keys(datamap(problem, var)))
-
         if varparams.neighborhood ≠ nothing
           # local search with a neighborhood
           neigh = varparams.neighborhood
 
-          # create a path from the data and outwards
-          # use at most 10^2 points to generate path
-          N = length(varlocs); M = ceil(Int, N/10^2)
-          path = SourcePath(view(varlocs,1:M:N))
-
-          searcher  = NeighborhoodSearcher(pdomain, neigh)
-          bsearcher = BoundedSearcher(searcher, maxneighbors)
+          if neigh isa BallNeighborhood
+            bsearcher = KBallSearcher(pdata, maxneighbors, neigh)
+          else
+            searcher  = NeighborhoodSearcher(pdata, neigh)
+            bsearcher = BoundedSearcher(searcher, maxneighbors)
+          end
         else
           # nearest neighbor search with a distance
           distance = varparams.distance
-          path = LinearPath()
-          bsearcher = NearestNeighborSearcher(pdomain, maxneighbors,
-                                              locations=varlocs, metric=distance)
+          bsearcher = NearestNeighborSearcher(pdata, maxneighbors, metric=distance)
         end
       else
         # use all data points as neighbors
-        path = LinearPath()
         bsearcher = nothing
       end
 
       # save preprocessed input
-      preproc[var] = (estimator=estimator, path=path,
+      preproc[var] = (estimator=estimator,
                       minneighbors=minneighbors,
                       maxneighbors=maxneighbors,
                       bsearcher=bsearcher)
@@ -164,7 +158,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     pdomain = domain(problem)
 
     # unpack preprocessed parameters
-    estimator, path, minneighbors, maxneighbors, bsearcher = preproc[var]
+    estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
     V = variables(problem)[var]
@@ -178,52 +172,38 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
 
     # pre-allocate memory for neighbors
     neighbors = Vector{Int}(undef, maxneighbors)
-    X = Matrix{coordtype(pdomain)}(undef, ndims(pdomain), maxneighbors)
-
-    # keep track of estimated locations
-    estimated = falses(npoints(pdomain))
-    for (loc, datloc) in datamap(problem, var)
-      varμ[loc] = pdata[datloc,var]
-      varσ[loc] = zero(V)
-      estimated[loc] = true
-    end
+    X = Matrix{coordtype(pdata)}(undef, ndims(pdata), maxneighbors)
 
     # estimation loop
-    for location in traverse(pdomain, path)
-      if !estimated[location]
-        # coordinates of neighborhood center
-        coordinates!(xₒ, pdomain, location)
+    for location in traverse(pdomain, LinearPath())
+      # coordinates of neighborhood center
+      coordinates!(xₒ, pdomain, location)
 
-        # find neighbors with previously estimated values
-        nneigh = search!(neighbors, xₒ, bsearcher, mask=estimated)
+      # find neighbors with previously estimated values
+      nneigh = search!(neighbors, xₒ, bsearcher)
 
-        # skip location in there are too few neighbors
-        if nneigh < minneighbors
-          varμ[location] = NaN
-          varσ[location] = NaN
-          estimated[location] = true
-          continue
-        end
-
+      # skip location in there are too few neighbors
+      if nneigh < minneighbors
+        varμ[location] = NaN
+        varσ[location] = NaN
+      else
         # final set of neighbors
         nview = view(neighbors, 1:nneigh)
 
-        # update neighbors coordinates
-        coordinates!(X, pdomain, nview)
+        # get neighbors coordinates and values
+        coordinates!(X, pdata, nview)
 
         Xview = view(X,:,1:nneigh)
-        zview = view(varμ, nview)
+        zview = view(pdata[var], nview)
 
         # fit estimator to data
         krig = fit(estimator, Xview, zview)
 
         # save mean and variance
         μ, σ² = predict(krig, xₒ)
+
         varμ[location] = μ
         varσ[location] = σ²
-
-        # mark location as estimated and continue
-        estimated[location] = true
       end
     end
 
@@ -236,7 +216,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     pdomain = domain(problem)
 
     # unpack preprocessed parameters
-    estimator, path, minneighbors, maxneighbors, bsearcher = preproc[var]
+    estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
     V = variables(problem)[var]
@@ -257,7 +237,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     # fit estimator once
     krig = fit(estimator, X, z)
 
-    for location in traverse(pdomain, path)
+    for location in traverse(pdomain, LinearPath())
       coordinates!(xₒ, pdomain, location)
 
       μ, σ² = predict(krig, xₒ)
