@@ -172,7 +172,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
 
     # pre-allocate memory for neighbors
     neighbors = Vector{Int}(undef, maxneighbors)
-    X = Matrix{coordtype(pdomain)}(undef, ndims(pdomain), maxneighbors)
+    X = Matrix{coordtype(pdata)}(undef, ndims(pdata), maxneighbors)
 
     # estimation loop
     for location in traverse(pdomain, LinearPath())
@@ -190,17 +190,18 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
         # final set of neighbors
         nview = view(neighbors, 1:nneigh)
 
-        # update neighbors coordinates
+        # get neighbors coordinates and values
         coordinates!(X, pdata, nview)
 
         Xview = view(X,:,1:nneigh)
-        zview = view(varμ, nview)
+        zview = view(pdata[var], nview)
 
         # fit estimator to data
         krig = fit(estimator, Xview, zview)
 
         # save mean and variance
         μ, σ² = predict(krig, xₒ)
+
         varμ[location] = μ
         varσ[location] = σ²
       end
