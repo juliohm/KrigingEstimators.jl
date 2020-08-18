@@ -34,7 +34,7 @@ nconstraints(estimator::SimpleKriging) = 0
 
 set_constraints_lhs!(estimator::SimpleKriging, LHS::AbstractMatrix, X::AbstractMatrix) = nothing
 
-factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(LHS, check=false)
+factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(Symmetric(LHS), check=false)
 
 set_constraints_rhs!(estimator::FittedKriging{E,S},
                      xₒ::AbstractVector) where {E<:SimpleKriging,S<:KrigingState} = nothing
