@@ -8,7 +8,7 @@ using GeoStatsBase
 using Variography
 
 using LinearAlgebra: Factorization, Symmetric
-using LinearAlgebra: lu, cholesky, issuccess, ⋅
+using LinearAlgebra: bunchkaufman, cholesky, issuccess, ⋅
 using Distances: Euclidean
 using Distributions: Normal
 using Combinatorics: multiexponents
