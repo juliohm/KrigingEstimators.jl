@@ -66,7 +66,7 @@ function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix, 
   nothing
 end
 
-factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = lu(Symmetric(LHS), check=false)
+factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
 function set_constraints_rhs!(estimator::FittedKriging{E,S},
                               xₒ::AbstractVector) where {E<:UniversalKriging,S<:KrigingState}

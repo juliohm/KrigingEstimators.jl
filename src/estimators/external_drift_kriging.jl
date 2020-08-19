@@ -49,7 +49,7 @@ function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatr
   nothing
 end
 
-factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = lu(Symmetric(LHS), check=false)
+factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
 function set_constraints_rhs!(estimator::FittedKriging{E,S},
                               xₒ::AbstractVector) where {E<:ExternalDriftKriging,S<:KrigingState}
