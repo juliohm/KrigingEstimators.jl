@@ -86,7 +86,7 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       if varparams.drifts ≠ nothing
         estimator = ExternalDriftKriging(varparams.variogram, varparams.drifts)
       elseif varparams.degree ≠ nothing
-        estimator = UniversalKriging(varparams.variogram, varparams.degree, ndims(pdomain))
+        estimator = UniversalKriging(varparams.variogram, varparams.degree, ncoords(pdomain))
       elseif varparams.mean ≠ nothing
         estimator = SimpleKriging(varparams.variogram, varparams.mean)
       else
@@ -156,6 +156,8 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve problem info
     pdata = data(problem)
     pdomain = domain(problem)
+    N = ncoords(pdomain)
+    T = coordtype(pdomain)
 
     # unpack preprocessed parameters
     estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
@@ -168,11 +170,11 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     varσ = Vector{V}(undef, npoints(pdomain))
 
     # pre-allocate memory for coordinates
-    xₒ = MVector{ndims(pdomain),coordtype(pdomain)}(undef)
+    xₒ = MVector{N,T}(undef)
 
     # pre-allocate memory for neighbors
     neighbors = Vector{Int}(undef, maxneighbors)
-    X = Matrix{coordtype(pdata)}(undef, ndims(pdata), maxneighbors)
+    X = Matrix{T}(undef, N, maxneighbors)
 
     # estimation loop
     for location in traverse(pdomain, LinearPath())
@@ -214,6 +216,8 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve problem info
     pdata = data(problem)
     pdomain = domain(problem)
+    N = ncoords(pdomain)
+    T = coordtype(pdomain)
 
     # unpack preprocessed parameters
     estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
@@ -226,7 +230,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     varσ = Vector{V}(undef, npoints(pdomain))
 
     # pre-allocate memory for coordinates
-    xₒ = MVector{ndims(pdomain),coordtype(pdomain)}(undef)
+    xₒ = MVector{N,T}(undef)
 
     # retrieve non-missing data
     locs = findall(!ismissing, pdata[var])
