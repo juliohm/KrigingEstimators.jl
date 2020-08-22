@@ -4,7 +4,7 @@ import GeoStatsBase: solvesingle
 @simsolver Dummy begin end
 function solvesingle(problem::SimulationProblem,
                      covars::NamedTuple, solver::Dummy, preproc)
-  npts = npoints(domain(problem))
+  npts = nelms(domain(problem))
   V = variables(problem)[var]
   vcat(fill(zero(V), npts÷2), fill(one(V), npts÷2))
 end

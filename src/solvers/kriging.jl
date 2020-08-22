@@ -166,8 +166,8 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     V = variables(problem)[var]
 
     # pre-allocate memory for result
-    varμ = Vector{V}(undef, npoints(pdomain))
-    varσ = Vector{V}(undef, npoints(pdomain))
+    varμ = Vector{V}(undef, nelms(pdomain))
+    varσ = Vector{V}(undef, nelms(pdomain))
 
     # pre-allocate memory for coordinates
     xₒ = MVector{N,T}(undef)
@@ -226,8 +226,8 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     V = variables(problem)[var]
 
     # pre-allocate memory for result
-    varμ = Vector{V}(undef, npoints(pdomain))
-    varσ = Vector{V}(undef, npoints(pdomain))
+    varμ = Vector{V}(undef, nelms(pdomain))
+    varσ = Vector{V}(undef, nelms(pdomain))
 
     # pre-allocate memory for coordinates
     xₒ = MVector{N,T}(undef)
