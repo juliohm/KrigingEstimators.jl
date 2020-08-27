@@ -112,7 +112,7 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
         else
           # nearest neighbor search with a distance
           distance = varparams.distance
-          bsearcher = NearestNeighborSearcher(pdata, maxneighbors, metric=distance)
+          bsearcher = KNearestSearcher(pdata, maxneighbors, metric=distance)
         end
       else
         # use all data points as neighbors
