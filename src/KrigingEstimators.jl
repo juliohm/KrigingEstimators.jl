@@ -15,12 +15,10 @@ using Combinatorics: multiexponents
 using StaticArrays: MVector
 
 import GeoStatsBase: fit, predict, status
-import GeoStatsBase: preprocess, solve, solvesingle
+import GeoStatsBase: solve
 
 include("estimators.jl")
-
 include("solvers/kriging.jl")
-include("solvers/sgsim.jl")
 
 export
   # estimators
@@ -32,7 +30,6 @@ export
   fit, predict, status, weights,
 
   # solvers
-  Kriging, KrigingParam,
-  SeqGaussSim, SeqGaussSimParam
+  Kriging
 
 end

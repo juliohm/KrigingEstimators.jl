@@ -97,49 +97,4 @@
       @plottest contourf(solution) joinpath(datadir,"LocalKriging2D.png") !istravis
     end
   end
-
-  @testset "SeqGaussSim" begin
-    nreals = 3
-
-    @testset "Conditional" begin
-      problem = SimulationProblem(data2D, grid2D, :value, nreals)
-
-      solver = SeqGaussSim(
-        :value => (variogram=GaussianVariogram(range=35.),
-                   neighborhood=BallNeighborhood(10.))
-      )
-
-      Random.seed!(2017)
-      solution = solve(problem, solver)
-
-      # basic checks
-      reals = solution[:value]
-      inds = LinearIndices(size(grid2D))
-      @test all(reals[i][inds[26,26]] == 1. for i in 1:nreals)
-      @test all(reals[i][inds[51,76]] == 0. for i in 1:nreals)
-      @test all(reals[i][inds[76,51]] == 1. for i in 1:nreals)
-
-      if visualtests
-        gr(size=(800,400))
-        # @plottest plot(solution) joinpath(datadir,"SGSCond2D.png") !istravis
-      end
-    end
-
-    @testset "Unconditional" begin
-      problem = SimulationProblem(grid2D, :value => Float64, nreals)
-
-      solver = SeqGaussSim(
-        :value => (variogram=GaussianVariogram(range=35.),
-                   neighborhood=BallNeighborhood(10.))
-      )
-
-      Random.seed!(2017)
-      solution = solve(problem, solver)
-
-      if visualtests
-        gr(size=(800,400))
-        # @plottest plot(solution) joinpath(datadir,"SGSUncond2D.png") !istravis
-      end
-    end
-  end
 end
