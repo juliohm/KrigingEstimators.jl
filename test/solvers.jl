@@ -110,16 +110,15 @@
     estimations.
     =# 
     data3D = readgeotable(joinpath(datadir,"data3D_samples.csv"), coordnames=(:x,:y,:z))
-    grid3D = domain(readgeotable(joinpath(datadir,"data3D_grid.csv"), coordnames=(:x,:y,:z)))
+    grid3D = readgeotable(joinpath(datadir,"data3D_grid.csv"), coordnames=(:x,:y,:z))
     
     γ = SphericalVariogram(sill=1.0, range=100.0, nugget=0.2)
     
-    problem = EstimationProblem(data3D, grid3D, :clay)
+    problem = EstimationProblem(data3D, domain(grid3D), :clay)
     
     local_kriging = Kriging(
-          :clay => (variogram=γ,
-                    maxneighbors=16, neighborhood=BallNeighborhood(250.0))
-        )
+      :clay => (variogram=γ, maxneighbors=16, neighborhood=BallNeighborhood(250.0))
+    )
     
     solution = solve(problem, local_kriging)
     
