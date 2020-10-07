@@ -16,7 +16,7 @@ Variography = "04a0146e-e6df-5636-8d7f-62fa9eb0b20c"
 [compat]
 Combinatorics = "0.7, 1.0"
 Distances = "0.8, 0.9"
-Distributions = "0.21, 0.22, 0.23"
+Distributions = "0.21, 0.22, 0.23, 0.24"
 GeoStatsBase = "0.13"
 StaticArrays = "0.12"
 Variography = "0.8"
