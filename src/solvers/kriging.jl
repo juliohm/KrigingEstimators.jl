@@ -104,15 +104,15 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
           neigh = varparams.neighborhood
 
           if neigh isa BallNeighborhood
-            bsearcher = KBallSearcher(pdata, maxneighbors, neigh)
+            bsearcher = KBallSearch(pdata, maxneighbors, neigh)
           else
-            searcher  = NeighborhoodSearcher(pdata, neigh)
-            bsearcher = BoundedSearcher(searcher, maxneighbors)
+            searcher  = NeighborhoodSearch(pdata, neigh)
+            bsearcher = BoundedSearch(searcher, maxneighbors)
           end
         else
           # nearest neighbor search with a distance
           distance = varparams.distance
-          bsearcher = KNearestSearcher(pdata, maxneighbors, metric=distance)
+          bsearcher = KNearestSearch(pdata, maxneighbors, metric=distance)
         end
       else
         # use all data points as neighbors
