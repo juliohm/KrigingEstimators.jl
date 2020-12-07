@@ -4,7 +4,7 @@
 
   # create some data
   dim = 3; nobs = 10
-  X = rand(dim, nobs)
+  X = 10*rand(dim, nobs)
   z = rand(nobs)
 
   # some target location
