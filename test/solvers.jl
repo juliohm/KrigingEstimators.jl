@@ -26,7 +26,7 @@
       gr(size=(800,400))
       for i in 1:3
         solution, sname = solutions[i], solnames[i]
-        @plottest plot(solution) joinpath(datadir,sname*"1D.png") !istravis
+        @plottest plot(solution) joinpath(datadir,sname*"1D.png") !isCI
       end
     end
   end
@@ -49,7 +49,7 @@
 
     if visualtests
       gr(size=(800,400))
-      @plottest contourf(solution) joinpath(datadir,"GlobalKriging2D.png") !istravis
+      @plottest contourf(solution) joinpath(datadir,"GlobalKriging2D.png") !isCI
     end
   end
 
@@ -71,7 +71,7 @@
 
     if visualtests
       gr(size=(800,400))
-      @plottest contourf(solution) joinpath(datadir,"NearestKriging2D.png") !istravis
+      @plottest contourf(solution) joinpath(datadir,"NearestKriging2D.png") !isCI
     end
   end
 
@@ -94,7 +94,7 @@
 
     if visualtests
       gr(size=(800,400))
-      @plottest contourf(solution) joinpath(datadir,"LocalKriging2D.png") !istravis
+      @plottest contourf(solution) joinpath(datadir,"LocalKriging2D.png") !isCI
     end
   end
 end
