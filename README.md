@@ -1,6 +1,6 @@
 # KrigingEstimators.jl
 
-[![][travis-img]][travis-url] [![][codecov-img]][codecov-url]
+[![][build-img]][build-url] [![][codecov-img]][codecov-url]
 
 This package provides high-performance implementations of Kriging estimators introduced by
 [Matheron 1971](https://books.google.com/books/about/The_Theory_of_Regionalized_Variables_and.html?id=TGhGAAAAYAAJ),
@@ -32,8 +32,8 @@ For examples of usage, please check the main documentation.
 
 If you have any questions, please contact our community on the [gitter channel](https://gitter.im/JuliaEarth/GeoStats.jl).
 
-[travis-img]: https://travis-ci.org/JuliaEarth/KrigingEstimators.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/JuliaEarth/KrigingEstimators.jl
+[build-img]: https://img.shields.io/github/workflow/status/JuliaEarth/KrigingEstimators.jl/CI?style=flat-square
+[build-url]: https://github.com/JuliaEarth/KrigingEstimators.jl/actions
 
 [codecov-img]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl
