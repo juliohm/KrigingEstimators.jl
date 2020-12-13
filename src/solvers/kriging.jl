@@ -136,7 +136,7 @@ function solve(problem::EstimationProblem, solver::Kriging)
 
   # results for each variable
   μs = []; σs = []
-  for (var, V) in variables(problem)
+  for var in name.(variables(problem))
     if preproc[var].maxneighbors ≠ nothing
       # perform Kriging with reduced number of neighbors
       varμ, varσ = solve_approx(problem, var, preproc)
@@ -159,11 +159,13 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     N = ncoords(pdomain)
     T = coordtype(pdomain)
 
+    mactypeof = Dict(name(v) => mactype(v) for v in variables(problem))
+
     # unpack preprocessed parameters
     estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
-    V = variables(problem)[var]
+    V = mactypeof[var]
 
     # pre-allocate memory for result
     varμ = Vector{V}(undef, nelms(pdomain))
@@ -219,11 +221,13 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     N = ncoords(pdomain)
     T = coordtype(pdomain)
 
+    mactypeof = Dict(name(v) => mactype(v) for v in variables(problem))
+
     # unpack preprocessed parameters
     estimator, minneighbors, maxneighbors, bsearcher = preproc[var]
 
     # determine value type
-    V = variables(problem)[var]
+    V = mactypeof[var]
 
     # pre-allocate memory for result
     varμ = Vector{V}(undef, nelms(pdomain))

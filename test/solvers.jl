@@ -42,10 +42,10 @@
 
     # basic checks
     inds = LinearIndices(size(grid2D))
-    M, V = solution[:value]
-    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
-    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
-    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
+    S = solution[:value][:value]
+    @test isapprox(S[inds[26,26]], 1., atol=1e-6)
+    @test isapprox(S[inds[51,76]], 0., atol=1e-6)
+    @test isapprox(S[inds[76,51]], 1., atol=1e-6)
 
     if visualtests
       gr(size=(800,400))
@@ -64,10 +64,10 @@
 
     # basic checks
     inds = LinearIndices(size(grid2D))
-    M, V = solution[:value]
-    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
-    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
-    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
+    S = solution[:value][:value]
+    @test isapprox(S[inds[26,26]], 1., atol=1e-6)
+    @test isapprox(S[inds[51,76]], 0., atol=1e-6)
+    @test isapprox(S[inds[76,51]], 1., atol=1e-6)
 
     if visualtests
       gr(size=(800,400))
@@ -87,10 +87,10 @@
 
     # basic checks
     inds = LinearIndices(size(grid2D))
-    M, V = solution[:value]
-    @test isapprox(M[inds[26,26]], 1., atol=1e-6)
-    @test isapprox(M[inds[51,76]], 0., atol=1e-6)
-    @test isapprox(M[inds[76,51]], 1., atol=1e-6)
+    S = solution[:value][:value]
+    @test isapprox(S[inds[26,26]], 1., atol=1e-6)
+    @test isapprox(S[inds[51,76]], 0., atol=1e-6)
+    @test isapprox(S[inds[76,51]], 1., atol=1e-6)
 
     if visualtests
       gr(size=(800,400))
