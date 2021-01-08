@@ -42,7 +42,7 @@
 
     # basic checks
     inds = LinearIndices(size(grid2D))
-    S = solution[:value][:value]
+    S = solution[:value]
     @test isapprox(S[inds[26,26]], 1., atol=1e-6)
     @test isapprox(S[inds[51,76]], 0., atol=1e-6)
     @test isapprox(S[inds[76,51]], 1., atol=1e-6)
@@ -64,7 +64,7 @@
 
     # basic checks
     inds = LinearIndices(size(grid2D))
-    S = solution[:value][:value]
+    S = solution[:value]
     @test isapprox(S[inds[26,26]], 1., atol=1e-6)
     @test isapprox(S[inds[51,76]], 0., atol=1e-6)
     @test isapprox(S[inds[76,51]], 1., atol=1e-6)
@@ -87,7 +87,7 @@
 
     # basic checks
     inds = LinearIndices(size(grid2D))
-    S = solution[:value][:value]
+    S = solution[:value]
     @test isapprox(S[inds[26,26]], 1., atol=1e-6)
     @test isapprox(S[inds[51,76]], 0., atol=1e-6)
     @test isapprox(S[inds[76,51]], 1., atol=1e-6)

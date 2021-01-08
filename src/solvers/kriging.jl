@@ -146,10 +146,10 @@ function solve(problem::EstimationProblem, solver::Kriging)
     end
 
     push!(μs, var => varμ)
-    push!(σs, var => varσ)
+    push!(σs, Symbol(var,:Var) => varσ)
   end
 
-  EstimationSolution(domain(problem), Dict(μs), Dict(σs))
+  georef((; μs..., σs...), domain(problem))
 end
 
 function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
