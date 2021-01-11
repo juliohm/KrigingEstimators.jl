@@ -24,6 +24,7 @@ Latter options override former options. For example, by specifying
 `mean`. If no option is specified, Ordinary Kriging is used by
 default with the `variogram` only.
 
+* `minneighbors` - Minimum number of neighbors (default to `1`)
 * `maxneighbors` - Maximum number of neighbors (default to `nothing`)
 * `neighborhood` - Search neighborhood (default to `nothing`)
 * `distance`     - Distance used to find nearest neighbors (default to `Euclidean()`)
