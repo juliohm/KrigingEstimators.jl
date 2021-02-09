@@ -4,7 +4,7 @@ using Variography
 using LinearAlgebra
 using Statistics
 using Plots, VisualRegressionTests
-using Test, Pkg, Random
+using Test, Random
 
 # workaround GR warnings
 ENV["GKSwstype"] = "100"
@@ -13,10 +13,6 @@ ENV["GKSwstype"] = "100"
 isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
-if !isCI
-  Pkg.add("Gtk")
-  using Gtk
-end
 datadir = joinpath(@__DIR__,"data")
 
 # dummy variables for testing
