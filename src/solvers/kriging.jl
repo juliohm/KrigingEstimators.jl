@@ -147,7 +147,7 @@ function solve(problem::EstimationProblem, solver::Kriging)
     end
 
     push!(μs, var => varμ)
-    push!(σs, Symbol(var,:Var) => varσ)
+    push!(σs, Symbol(var,"-variance") => varσ)
   end
 
   georef((; μs..., σs...), domain(problem))
