@@ -87,7 +87,7 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
       if varparams.drifts ≠ nothing
         estimator = ExternalDriftKriging(varparams.variogram, varparams.drifts)
       elseif varparams.degree ≠ nothing
-        estimator = UniversalKriging(varparams.variogram, varparams.degree, ncoords(pdomain))
+        estimator = UniversalKriging(varparams.variogram, varparams.degree, embeddim(pdomain))
       elseif varparams.mean ≠ nothing
         estimator = SimpleKriging(varparams.variogram, varparams.mean)
       else
@@ -104,7 +104,7 @@ function preprocess(problem::EstimationProblem, solver::Kriging)
           # local search with a neighborhood
           neigh = varparams.neighborhood
 
-          if neigh isa BallNeighborhood
+          if neigh isa MetricBall
             bsearcher = KBallSearch(pdata, maxneighbors, neigh)
           else
             searcher  = NeighborhoodSearch(pdata, neigh)
@@ -157,7 +157,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve problem info
     pdata = data(problem)
     pdomain = domain(problem)
-    N = ncoords(pdomain)
+    N = embeddim(pdomain)
     T = coordtype(pdomain)
 
     mactypeof = Dict(name(v) => mactype(v) for v in variables(problem))
@@ -169,8 +169,8 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
     V = mactypeof[var]
 
     # pre-allocate memory for result
-    varμ = Vector{V}(undef, nelms(pdomain))
-    varσ = Vector{V}(undef, nelms(pdomain))
+    varμ = Vector{V}(undef, nelements(pdomain))
+    varσ = Vector{V}(undef, nelements(pdomain))
 
     # pre-allocate memory for coordinates
     xₒ = MVector{N,T}(undef)
@@ -185,7 +185,7 @@ function solve_approx(problem::EstimationProblem, var::Symbol, preproc)
       coordinates!(xₒ, pdomain, location)
 
       # find neighbors with previously estimated values
-      nneigh = search!(neighbors, xₒ, bsearcher)
+      nneigh = search!(neighbors, Point(xₒ), bsearcher)
 
       # skip location in there are too few neighbors
       if nneigh < minneighbors
@@ -219,7 +219,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve problem info
     pdata = data(problem)
     pdomain = domain(problem)
-    N = ncoords(pdomain)
+    N = embeddim(pdomain)
     T = coordtype(pdomain)
 
     mactypeof = Dict(name(v) => mactype(v) for v in variables(problem))
@@ -231,8 +231,8 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     V = mactypeof[var]
 
     # pre-allocate memory for result
-    varμ = Vector{V}(undef, nelms(pdomain))
-    varσ = Vector{V}(undef, nelms(pdomain))
+    varμ = Vector{V}(undef, nelements(pdomain))
+    varσ = Vector{V}(undef, nelements(pdomain))
 
     # pre-allocate memory for coordinates
     xₒ = MVector{N,T}(undef)
@@ -240,7 +240,7 @@ function solve_exact(problem::EstimationProblem, var::Symbol, preproc)
     # retrieve non-missing data
     locs = findall(!ismissing, pdata[var])
     𝒟 = view(pdata, locs)
-    X = coordinates(𝒟)
+    X = coordinates(𝒟, 1:nelements(𝒟))
     z = 𝒟[var]
 
     # fit estimator once
