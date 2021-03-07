@@ -28,22 +28,21 @@ end
 
 SimpleKriging(γ, μ) = SimpleKriging{typeof(γ),typeof(μ)}(γ, μ)
 
-SimpleKriging(X, z, γ, μ) = GeoStatsBase.fit(SimpleKriging(γ, μ), X, z)
+SimpleKriging(data, var, γ, μ) = GeoStatsBase.fit(SimpleKriging(γ, μ), data, var)
 
-nconstraints(estimator::SimpleKriging) = 0
+nconstraints(::SimpleKriging) = 0
 
-set_constraints_lhs!(estimator::SimpleKriging, LHS::AbstractMatrix, X::AbstractMatrix) = nothing
+set_constraints_lhs!(::SimpleKriging, LHS::AbstractMatrix, domain) = nothing
 
-factorize(estimator::SimpleKriging, LHS::AbstractMatrix) = cholesky(Symmetric(LHS), check=false)
+factorize(::SimpleKriging, LHS::AbstractMatrix) = cholesky(Symmetric(LHS), check=false)
 
-set_constraints_rhs!(estimator::FittedKriging{E,S},
-                     xₒ::AbstractVector) where {E<:SimpleKriging,S<:KrigingState} = nothing
+set_constraints_rhs!(::FittedKriging{<:SimpleKriging}, pₒ) = nothing
 
-function combine(estimator::FittedKriging{E,S},
-                 weights::KrigingWeights, z::AbstractVector) where {E<:SimpleKriging,S<:KrigingState}
-  γ = estimator.estimator.γ
-  μ = estimator.estimator.μ
-  b = estimator.state.RHS
+function combine(fitted::FittedKriging{<:SimpleKriging},
+                 weights::KrigingWeights, z::AbstractVector)
+  γ = fitted.estimator.γ
+  μ = fitted.estimator.μ
+  b = fitted.state.RHS
   λ = weights.λ
   y = z .- μ
 

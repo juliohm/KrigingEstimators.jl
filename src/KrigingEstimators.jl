@@ -10,16 +10,12 @@ using Variography
 
 using LinearAlgebra: Factorization, Symmetric
 using LinearAlgebra: bunchkaufman, cholesky, issuccess, ⋅
-using Distances: Euclidean
-using Distributions: Normal
 using Combinatorics: multiexponents
-using StaticArrays: MVector
 
 import GeoStatsBase: fit, predict, status
 import GeoStatsBase: solve
 
 include("estimators.jl")
-include("solvers/kriging.jl")
 
 export
   # estimators
@@ -28,9 +24,6 @@ export
   OrdinaryKriging,
   UniversalKriging,
   ExternalDriftKriging,
-  fit, predict, status, weights,
-
-  # solvers
-  Kriging
+  fit, predict, status, weights
 
 end

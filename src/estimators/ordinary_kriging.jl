@@ -17,26 +17,22 @@ end
 
 OrdinaryKriging(γ) = OrdinaryKriging{typeof(γ)}(γ)
 
-OrdinaryKriging(X, z, γ) = GeoStatsBase.fit(OrdinaryKriging(γ), X, z)
+OrdinaryKriging(data, var, γ) = GeoStatsBase.fit(OrdinaryKriging(γ), data, var)
 
-nconstraints(estimator::OrdinaryKriging) = 1
+nconstraints(::OrdinaryKriging) = 1
 
-function set_constraints_lhs!(estimator::OrdinaryKriging, LHS::AbstractMatrix, X::AbstractMatrix)
+function set_constraints_lhs!(::OrdinaryKriging, LHS::AbstractMatrix, domain)
   T = eltype(LHS)
   LHS[end,:]   .= one(T)
   LHS[:,end]   .= one(T)
   LHS[end,end]  = zero(T)
-
   nothing
 end
 
-factorize(estimator::OrdinaryKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
+factorize(::OrdinaryKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
-function set_constraints_rhs!(estimator::FittedKriging{E,S},
-                              xₒ::AbstractVector) where {E<:OrdinaryKriging,S<:KrigingState}
-  RHS = estimator.state.RHS
-
+function set_constraints_rhs!(fitted::FittedKriging{<:OrdinaryKriging}, pₒ)
+  RHS = fitted.state.RHS
   RHS[end] = one(eltype(RHS))
-
   nothing
 end

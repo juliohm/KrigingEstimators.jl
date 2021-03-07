@@ -27,36 +27,38 @@ end
 
 ExternalDriftKriging(γ, drifts) = ExternalDriftKriging{typeof(γ)}(γ, drifts)
 
-ExternalDriftKriging(X, z, γ, drifts) = GeoStatsBase.fit(ExternalDriftKriging(γ, drifts), X ,z)
+ExternalDriftKriging(data, var, γ, drifts) = GeoStatsBase.fit(ExternalDriftKriging(γ, drifts), data, var)
 
 nconstraints(estimator::ExternalDriftKriging) = length(estimator.drifts)
 
-function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatrix, X::AbstractMatrix)
+function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatrix, domain)
   drifts = estimator.drifts
   ndrifts = length(drifts)
-  nobs = size(X, 2)
-  T = eltype(LHS)
+  nobs = nelements(domain)
 
   # set drift blocks
-  for i=1:nobs, j=1:ndrifts
-    LHS[nobs+j,i] = drifts[j](X[:,i])
-    LHS[i,nobs+j] = LHS[nobs+j,i]
+  for i in 1:nobs
+    x = coordinates(centroid(domain, i))
+    for j in 1:ndrifts
+      LHS[nobs+j,i] = drifts[j](x)
+      LHS[i,nobs+j] = LHS[nobs+j,i]
+    end
   end
 
   # set zero block
-  LHS[nobs+1:end,nobs+1:end] .= zero(T)
+  LHS[nobs+1:end,nobs+1:end] .= zero(eltype(LHS))
 
   nothing
 end
 
-factorize(estimator::ExternalDriftKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
+factorize(::ExternalDriftKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
-function set_constraints_rhs!(estimator::FittedKriging{E,S},
-                              xₒ::AbstractVector) where {E<:ExternalDriftKriging,S<:KrigingState}
-  drifts = estimator.estimator.drifts
-  RHS = estimator.state.RHS
-  nobs = size(estimator.state.X, 2)
+function set_constraints_rhs!(fitted::FittedKriging{<:ExternalDriftKriging}, pₒ)
+  drifts = fitted.estimator.drifts
+  RHS = fitted.state.RHS
+  nobs = nelements(fitted.state.data)
 
+  xₒ = coordinates(pₒ)
   for (j, m) in enumerate(drifts)
     RHS[nobs+j] = m(xₒ)
   end

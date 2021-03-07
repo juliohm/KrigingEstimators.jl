@@ -33,7 +33,8 @@ end
 
 UniversalKriging(γ, degree, dim) = UniversalKriging{typeof(γ)}(γ, degree, dim)
 
-UniversalKriging(X, z, γ, degree) = GeoStatsBase.fit(UniversalKriging(γ, degree, size(X,1)), X, z)
+UniversalKriging(data, var, γ, degree) =
+  GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(data)), data, var)
 
 function UKexps(degree::Int, dim::Int)
   # multinomial expansion
@@ -48,33 +49,35 @@ end
 
 nconstraints(estimator::UniversalKriging) = size(estimator.exponents, 2)
 
-function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix, X::AbstractMatrix)
+function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix, domain)
   exponents = estimator.exponents
-  nobs = size(X, 2)
+  nobs = nelements(domain)
   nterms = size(exponents, 2)
-  T = eltype(LHS)
 
   # set polynomial drift blocks
-  for i=1:nobs, j=1:nterms
-    LHS[nobs+j,i] = prod(X[:,i].^exponents[:,j])
-    LHS[i,nobs+j] = LHS[nobs+j,i]
+  for i in 1:nobs
+    x = coordinates(centroid(domain, i))
+    for j in 1:nterms
+      LHS[nobs+j,i] = prod(x.^exponents[:,j])
+      LHS[i,nobs+j] = LHS[nobs+j,i]
+    end
   end
 
   # set zero block
-  LHS[nobs+1:end,nobs+1:end] .= zero(T)
+  LHS[nobs+1:end,nobs+1:end] .= zero(eltype(LHS))
 
   nothing
 end
 
-factorize(estimator::UniversalKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
+factorize(::UniversalKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
-function set_constraints_rhs!(estimator::FittedKriging{E,S},
-                              xₒ::AbstractVector) where {E<:UniversalKriging,S<:KrigingState}
-  exponents = estimator.estimator.exponents
-  RHS = estimator.state.RHS
-  nobs = size(estimator.state.X, 2)
+function set_constraints_rhs!(fitted::FittedKriging{<:UniversalKriging}, pₒ)
+  exponents = fitted.estimator.exponents
+  RHS = fitted.state.RHS
+  nobs = nelements(fitted.state.data)
   nterms = size(exponents, 2)
 
+  xₒ = coordinates(pₒ)
   for j in 1:nterms
     RHS[nobs+j] = prod(xₒ.^exponents[:,j])
   end

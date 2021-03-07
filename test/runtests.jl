@@ -17,13 +17,9 @@ islinux = Sys.islinux()
 visualtests = !isCI || (isCI && islinux)
 datadir = joinpath(@__DIR__,"data")
 
-# dummy variables for testing
-include("dummy.jl")
-
 # list of tests
 testfiles = [
-  "estimators.jl",
-  "solvers.jl"
+  "estimators.jl"
 ]
 
 @testset "KrigingEstimators.jl" begin

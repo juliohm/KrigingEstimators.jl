@@ -10,17 +10,14 @@ A Kriging estimator (e.g. Simple Kriging).
 abstract type KrigingEstimator end
 
 """
-    KrigingState(X, z, LHS, RHS)
+    KrigingState(data, var, LHS, RHS)
 
 A Kriging state stores information needed
 to perform estimation at any given location.
 """
-mutable struct KrigingState{T<:Real,V,
-                            A<:AbstractMatrix{T},
-                            B<:AbstractVector{V},
-                            F<:Factorization,R}
-  X::A
-  z::B
+mutable struct KrigingState{D<:Data,F<:Factorization,R}
+  data::D
+  var::Symbol
   LHS::F
   RHS::Vector{R}
 end
@@ -59,44 +56,44 @@ status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
 #--------------
 
 """
-    fit(estimator, X, z)
+    fit(estimator, data, var)
 
-Build Kriging system from coordinates `X` and
-values `z` and return a fitted estimator.
+Build Kriging system from `data` and variable `var`
+and return a fitted estimator.
 """
-function fit(estimator::KrigingEstimator, X::AbstractMatrix, z::AbstractVector)
+function fit(estimator::KrigingEstimator, data, var)
   # build Kriging system
-  LHS = lhs(estimator, X)
+  LHS = lhs(estimator, domain(data))
   RHS = Vector{eltype(LHS)}(undef, size(LHS,1))
 
   # factorize LHS
   FLHS = factorize(estimator, LHS)
 
   # record Kriging state
-  state = KrigingState(X, z, FLHS, RHS)
+  state = KrigingState(data, var, FLHS, RHS)
 
   # return fitted estimator
   FittedKriging(estimator, state)
 end
 
 """
-    lhs(estimator, X)
+    lhs(estimator, domain)
 
-Return LHS of Kriging system using spatial configuration `X`.
+Return LHS of Kriging system for the elements in the `domain`.
 """
-function lhs(estimator::KrigingEstimator, X::AbstractMatrix)
+function lhs(estimator::KrigingEstimator, domain)
   γ = estimator.γ
-  nobs = size(X, 2)
+  nobs = nelements(domain)
   ncons = nconstraints(estimator)
 
   # pre-allocate memory for LHS
-  x = view(X,:,1)
+  x = centroid(domain, 1)
   T = Variography.result_type(γ, x, x)
   m = nobs + ncons
   LHS = Matrix{T}(undef, m, m)
 
   # set variogram/covariance block
-  pairwise!(LHS, γ, X)
+  pairwise!(LHS, γ, domain)
   if isstationary(γ)
     for j=1:nobs, i=1:nobs
       @inbounds LHS[i,j] = sill(γ) - LHS[i,j]
@@ -104,7 +101,7 @@ function lhs(estimator::KrigingEstimator, X::AbstractMatrix)
   end
 
   # set blocks of constraints
-  set_constraints_lhs!(estimator, LHS, X)
+  set_constraints_lhs!(estimator, LHS, domain)
 
   LHS
 end
@@ -114,72 +111,74 @@ end
 
 Return number of constraints for `estimator`.
 """
-nconstraints(estimator::KrigingEstimator) = error("not implemented")
+function nconstraints end
 
 """
     set_constraints_lhs!(estimator, LHS, X)
 
 Set constraints in LHS of Kriging system.
 """
-set_constraints_lhs!(estimator::KrigingEstimator,
-                     LHS::AbstractMatrix, X::AbstractMatrix) = error("not implemented")
+function set_constraints_lhs! end
 
 """
     factorize(estimator, LHS)
 
 Factorize LHS of Kriging system with appropriate factorization method.
 """
-factorize(estimator::KrigingEstimator, LHS::AbstractMatrix) = error("not implemented")
+function factorize end
 
 #-----------------
 # PREDICTION STEP
 #-----------------
 
 """
-    predict(estimator, xₒ)
+    predict(estimator, pₒ)
 
-Compute mean and variance for the `estimator` at coordinates `xₒ`.
+Compute mean and variance for the `estimator` at point `pₒ`.
 """
-predict(estimator::FittedKriging, xₒ::AbstractVector) =
-  combine(estimator, weights(estimator, xₒ), estimator.state.z)
+function predict(fitted::FittedKriging, pₒ)
+  data = fitted.state.data
+  var  = fitted.state.var
+  combine(fitted, weights(fitted, pₒ), data[var])
+end
 
 """
-    weights(estimator, xₒ)
+    weights(estimator, pₒ)
 
 Compute the weights λ (and Lagrange multipliers ν) for the
-`estimator` at coordinates `xₒ`.
+`estimator` at point `pₒ`.
 """
-function weights(estimator::FittedKriging, xₒ::AbstractVector)
-  nobs = size(estimator.state.X, 2)
+function weights(fitted::FittedKriging, pₒ)
+  nobs = nelements(fitted.state.data)
 
-  set_rhs!(estimator, xₒ)
+  set_rhs!(fitted, pₒ)
 
   # solve Kriging system
-  x = estimator.state.LHS \ estimator.state.RHS
+  s = fitted.state.LHS \ fitted.state.RHS
 
-  λ = view(x,1:nobs)
-  ν = view(x,nobs+1:length(x))
+  λ = view(s, 1:nobs)
+  ν = view(s, nobs+1:length(s))
 
   KrigingWeights(λ, ν)
 end
 
 """
-    set_rhs!(estimator, xₒ)
+    set_rhs!(estimator, pₒ)
 
-Set RHS of Kriging system at coodinates `xₒ`.
+Set RHS of Kriging system at point `pₒ`.
 """
-function set_rhs!(estimator::FittedKriging, xₒ::AbstractVector)
-  γ = estimator.estimator.γ
-  X = estimator.state.X
-  RHS = estimator.state.RHS
+function set_rhs!(fitted::FittedKriging, pₒ)
+  γ = fitted.estimator.γ
+  dom = domain(fitted.state.data)
+  RHS = fitted.state.RHS
 
   # RHS variogram/covariance
-  @inbounds for j in 1:size(X, 2)
-    xj = view(X,:,j)
-    RHS[j] = isstationary(γ) ? sill(γ) - γ(xj, xₒ) : γ(xj, xₒ)
+  @inbounds for j in 1:nelements(dom)
+    pⱼ = centroid(dom, j)
+    RHS[j] = isstationary(γ) ? sill(γ) - γ(pⱼ, pₒ) : γ(pⱼ, pₒ)
   end
 
-  set_constraints_rhs!(estimator, xₒ)
+  set_constraints_rhs!(fitted, pₒ)
 end
 
 """
@@ -187,23 +186,25 @@ end
 
 Set constraints in RHS of Kriging system.
 """
-set_constraints_rhs!(estimator::FittedKriging, xₒ::AbstractVector) = error("not implemented")
+function set_constraints_rhs! end
 
 """
     combine(estimator, weights, z)
 
 Combine `weights` with values `z` to produce mean and variance.
 """
-function combine(estimator::FittedKriging, weights::KrigingWeights, z::AbstractVector)
-  γ = estimator.estimator.γ
-  b = estimator.state.RHS
+function combine(fitted::FittedKriging,
+                 weights::KrigingWeights,
+                 z::AbstractVector)
+  γ = fitted.estimator.γ
+  b = fitted.state.RHS
   λ = weights.λ
   ν = weights.ν
 
   # compute b⋅[λ;ν]
   nobs  = length(λ)
-  c₁ = view(b,1:nobs)⋅λ
-  c₂ = view(b,nobs+1:length(b))⋅ν
+  c₁ = view(b, 1:nobs) ⋅ λ
+  c₂ = view(b, nobs+1:length(b)) ⋅ ν
   c = c₁ + c₂
 
   if isstationary(γ)
@@ -213,9 +214,10 @@ function combine(estimator::FittedKriging, weights::KrigingWeights, z::AbstractV
   end
 end
 
-#-----------------
+# ----------------
 # IMPLEMENTATIONS
-#-----------------
+# ----------------
+
 include("estimators/simple_kriging.jl")
 include("estimators/ordinary_kriging.jl")
 include("estimators/universal_kriging.jl")
