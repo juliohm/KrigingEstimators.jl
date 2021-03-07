@@ -218,7 +218,7 @@ end
 # IMPLEMENTATIONS
 # ----------------
 
-include("estimators/simple_kriging.jl")
-include("estimators/ordinary_kriging.jl")
-include("estimators/universal_kriging.jl")
-include("estimators/external_drift_kriging.jl")
+include("estimators/sk.jl")
+include("estimators/ok.jl")
+include("estimators/uk.jl")
+include("estimators/edk.jl")

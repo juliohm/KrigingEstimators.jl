@@ -1,6 +1,6 @@
 @testset "Estimators" begin
   # floating point tolerance
-  tol = 10eps()
+  tol = 100eps()
 
   # create some data
   dim = 3; nobs = 10
@@ -143,8 +143,8 @@
   data_f = georef((z=z_f,), pset_f)
   pset_d = PointSet(X_d)
   data_d = georef((z=z_d,), pset_d)
-  pₒ_f   = Point(rand(Float32, dim))
-  pₒ_d   = Point(Float64.(coordinates(pₒ_f)))
+  pₒ_f   = rand(Point{dim,Float32})
+  pₒ_d   = convert(Point{dim,Float64}, pₒ_f)
   γ_f         = GaussianVariogram(sill=1f0, range=1f0, nugget=0f0)
   simkrig_f   = SimpleKriging(data_f, :z, γ_f, mean(data_f[:z]))
   ordkrig_f   = OrdinaryKriging(data_f, :z, γ_f)
