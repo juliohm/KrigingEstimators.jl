@@ -84,18 +84,18 @@ Return LHS of Kriging system for the elements in the `domain`.
 function lhs(estimator::KrigingEstimator, domain)
   γ = estimator.γ
   nobs = nelements(domain)
-  ncons = nconstraints(estimator)
+  ncon = nconstraints(estimator)
 
   # pre-allocate memory for LHS
-  x = centroid(domain, 1)
-  T = Variography.result_type(γ, x, x)
-  m = nobs + ncons
-  LHS = Matrix{T}(undef, m, m)
+  u = first(domain)
+  R = Variography.result_type(γ, u, u)
+  m = nobs + ncon
+  LHS = Matrix{R}(undef, m, m)
 
   # set variogram/covariance block
   pairwise!(LHS, γ, domain)
   if isstationary(γ)
-    for j=1:nobs, i=1:nobs
+    for j in 1:nobs, i in 1:nobs
       @inbounds LHS[i,j] = sill(γ) - LHS[i,j]
     end
   end
@@ -132,26 +132,27 @@ function factorize end
 #-----------------
 
 """
-    predict(estimator, pₒ)
+    predict(estimator, uₒ)
 
-Compute mean and variance for the `estimator` at point `pₒ`.
+Compute mean and variance for the `estimator` at point or
+geometry `uₒ`.
 """
-function predict(fitted::FittedKriging, pₒ)
+function predict(fitted::FittedKriging, uₒ)
   data = fitted.state.data
   var  = fitted.state.var
-  combine(fitted, weights(fitted, pₒ), data[var])
+  combine(fitted, weights(fitted, uₒ), data[var])
 end
 
 """
-    weights(estimator, pₒ)
+    weights(estimator, uₒ)
 
 Compute the weights λ (and Lagrange multipliers ν) for the
-`estimator` at point `pₒ`.
+`estimator` at point or geometry `uₒ`.
 """
-function weights(fitted::FittedKriging, pₒ)
+function weights(fitted::FittedKriging, uₒ)
   nobs = nelements(fitted.state.data)
 
-  set_rhs!(fitted, pₒ)
+  set_rhs!(fitted, uₒ)
 
   # solve Kriging system
   s = fitted.state.LHS \ fitted.state.RHS
@@ -163,22 +164,22 @@ function weights(fitted::FittedKriging, pₒ)
 end
 
 """
-    set_rhs!(estimator, pₒ)
+    set_rhs!(estimator, uₒ)
 
-Set RHS of Kriging system at point `pₒ`.
+Set RHS of Kriging system at point or geometry `uₒ`.
 """
-function set_rhs!(fitted::FittedKriging, pₒ)
+function set_rhs!(fitted::FittedKriging, uₒ)
   γ = fitted.estimator.γ
   dom = domain(fitted.state.data)
   RHS = fitted.state.RHS
 
   # RHS variogram/covariance
   @inbounds for j in 1:nelements(dom)
-    pⱼ = centroid(dom, j)
-    RHS[j] = isstationary(γ) ? sill(γ) - γ(pⱼ, pₒ) : γ(pⱼ, pₒ)
+    uⱼ = dom[j]
+    RHS[j] = isstationary(γ) ? sill(γ) - γ(uⱼ, uₒ) : γ(uⱼ, uₒ)
   end
 
-  set_constraints_rhs!(fitted, pₒ)
+  set_constraints_rhs!(fitted, uₒ)
 end
 
 """
