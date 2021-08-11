@@ -71,13 +71,17 @@ end
 
 factorize(::UniversalKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
-function set_constraints_rhs!(fitted::FittedKriging{<:UniversalKriging}, pₒ)
+function set_constraints_rhs!(fitted::FittedKriging{<:UniversalKriging}, uₒ)
   exponents = fitted.estimator.exponents
   RHS = fitted.state.RHS
   nobs = nelements(fitted.state.data)
   nterms = size(exponents, 2)
 
-  xₒ = coordinates(pₒ)
+  # retrieve centroid
+  cₒ = uₒ isa Point ? uₒ : centroid(uₒ)
+
+  # set polynomial drift
+  xₒ = coordinates(cₒ)
   for j in 1:nterms
     RHS[nobs+j] = prod(xₒ.^exponents[:,j])
   end

@@ -36,7 +36,7 @@ function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatr
   ndrifts = length(drifts)
   nobs = nelements(domain)
 
-  # set drift blocks
+  # set external drift blocks
   for i in 1:nobs
     x = coordinates(centroid(domain, i))
     for j in 1:ndrifts
@@ -53,12 +53,16 @@ end
 
 factorize(::ExternalDriftKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
 
-function set_constraints_rhs!(fitted::FittedKriging{<:ExternalDriftKriging}, pₒ)
+function set_constraints_rhs!(fitted::FittedKriging{<:ExternalDriftKriging}, uₒ)
   drifts = fitted.estimator.drifts
   RHS = fitted.state.RHS
   nobs = nelements(fitted.state.data)
 
-  xₒ = coordinates(pₒ)
+  # retrieve centroid
+  cₒ = uₒ isa Point ? uₒ : centroid(uₒ)
+
+  # set external drift
+  xₒ = coordinates(cₒ)
   for (j, m) in enumerate(drifts)
     RHS[nobs+j] = m(xₒ)
   end

@@ -135,16 +135,16 @@
   end
 
   # Floating point precision checks
-  X_f    = rand(Float32, dim, nobs)
-  z_f    = rand(Float32, nobs)
-  X_d    = Float64.(X_f)
-  z_d    = Float64.(z_f)
-  pset_f = PointSet(X_f)
-  data_f = georef((z=z_f,), pset_f)
-  pset_d = PointSet(X_d)
-  data_d = georef((z=z_d,), pset_d)
-  pₒ_f   = rand(Point{dim,Float32})
-  pₒ_d   = convert(Point{dim,Float64}, pₒ_f)
+  X_f         = rand(Float32, dim, nobs)
+  z_f         = rand(Float32, nobs)
+  X_d         = Float64.(X_f)
+  z_d         = Float64.(z_f)
+  pset_f      = PointSet(X_f)
+  data_f      = georef((z=z_f,), pset_f)
+  pset_d      = PointSet(X_d)
+  data_d      = georef((z=z_d,), pset_d)
+  pₒ_f        = rand(Point{dim,Float32})
+  pₒ_d        = convert(Point{dim,Float64}, pₒ_f)
   γ_f         = GaussianVariogram(sill=1f0, range=1f0, nugget=0f0)
   simkrig_f   = SimpleKriging(data_f, :z, γ_f, mean(data_f[:z]))
   ordkrig_f   = OrdinaryKriging(data_f, :z, γ_f)
@@ -171,4 +171,34 @@
   @test isapprox(UKvar_f, UKvar_d, atol=1e-4)
   @test isapprox(DKestimate_f, DKestimate_d, atol=1e-4)
   @test isapprox(DKvar_f, DKvar_d, atol=1e-4)
+
+  # ------------------
+  # CHANGE OF SUPPORT
+  # ------------------
+
+  # create some data
+  dim = 2; nobs = 10
+  pset = PointSet(10*rand(dim, nobs))
+  data = georef((z=rand(nobs),), pset)
+
+  # basic estimators
+  γ = GaussianVariogram(sill=1., range=1., nugget=0.)
+  simkrig = SimpleKriging(data, :z, γ, mean(data[:z]))
+  ordkrig = OrdinaryKriging(data, :z, γ)
+  unikrig = UniversalKriging(data, :z, γ, 1)
+  driftkrig = ExternalDriftKriging(data, :z, γ, [x->1.])
+
+  # prediction on a quadrangle
+  uₒ = Quadrangle((0.,0.), (1.,0.), (1.,1.), (0.,1.))
+  _, SKvar = predict(simkrig, uₒ)
+  _, OKvar = predict(ordkrig, uₒ)
+  _, UKvar = predict(unikrig, uₒ)
+  _, DKvar = predict(driftkrig, uₒ)
+
+  # variance checks
+  @test SKvar + tol ≥ 0
+  @test OKvar + tol ≥ 0
+  @test UKvar + tol ≥ 0
+  @test DKvar + tol ≥ 0
+  @test SKvar ≤ OKvar + tol
 end
