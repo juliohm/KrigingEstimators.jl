@@ -93,8 +93,9 @@ function lhs(estimator::KrigingEstimator, domain)
   # set variogram/covariance block
   pairwise!(LHS, γ, domain)
   if isstationary(γ)
+    σ² = sill(γ)
     for j in 1:nobs, i in 1:nobs
-      @inbounds LHS[i,j] = sill(γ) - LHS[i,j]
+      @inbounds LHS[i,j] = σ² - LHS[i,j]
     end
   end
 
@@ -171,9 +172,14 @@ function set_rhs!(fitted::FittedKriging, uₒ)
   RHS = fitted.state.RHS
 
   # RHS variogram/covariance
-  @inbounds for j in 1:nelements(dom)
-    uⱼ = dom[j]
-    RHS[j] = isstationary(γ) ? sill(γ) - γ(uⱼ, uₒ) : γ(uⱼ, uₒ)
+  for j in 1:nelements(dom)
+    @inbounds RHS[j] = γ(dom[j], uₒ)
+  end
+  if isstationary(γ)
+    σ² = sill(γ)
+    for j in 1:nelements(dom)
+      @inbounds RHS[j] = σ² - RHS[j]
+    end
   end
 
   set_constraints_rhs!(fitted, uₒ)
