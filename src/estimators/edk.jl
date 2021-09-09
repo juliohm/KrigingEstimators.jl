@@ -4,13 +4,12 @@
 
 """
     ExternalDriftKriging(γ, drifts)
-    ExternalDriftKriging(X, z, γ, drifts)
+    ExternalDriftKriging(data, γ, drifts)
 
 External Drift Kriging with variogram model `γ` and
 external `drifts` functions.
 
-Optionally, pass the coordinates `X` and values `z`
-to the [`fit`](@ref) function.
+Optionally, pass the geospatial `data` to the [`fit`](@ref) function.
 
 ### Notes
 
@@ -27,7 +26,7 @@ end
 
 ExternalDriftKriging(γ, drifts) = ExternalDriftKriging{typeof(γ)}(γ, drifts)
 
-ExternalDriftKriging(data, var, γ, drifts) = GeoStatsBase.fit(ExternalDriftKriging(γ, drifts), data, var)
+ExternalDriftKriging(data, γ, drifts) = GeoStatsBase.fit(ExternalDriftKriging(γ, drifts), data)
 
 nconstraints(estimator::ExternalDriftKriging) = length(estimator.drifts)
 

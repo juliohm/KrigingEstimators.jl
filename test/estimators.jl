@@ -8,17 +8,17 @@
   data = georef((z=rand(nobs),), pset)
 
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig = SimpleKriging(data, :z, γ, mean(data[:z]))
-  ordkrig = OrdinaryKriging(data, :z, γ)
-  unikrig = UniversalKriging(data, :z, γ, 1)
-  driftkrig = ExternalDriftKriging(data, :z, γ, [x->1.])
+  simkrig = SimpleKriging(data, γ, mean(data[:z]))
+  ordkrig = OrdinaryKriging(data, γ)
+  unikrig = UniversalKriging(data, γ, 1)
+  drikrig = ExternalDriftKriging(data, γ, [x->1.])
 
   # Kriging is an interpolator
   for j in 1:nobs
-    SKestimate, SKvar = predict(simkrig, pset[j])
-    OKestimate, OKvar = predict(ordkrig, pset[j])
-    UKestimate, UKvar = predict(unikrig, pset[j])
-    DKestimate, DKvar = predict(driftkrig, pset[j])
+    SKestimate, SKvar = predict(simkrig, :z, pset[j])
+    OKestimate, OKvar = predict(ordkrig, :z, pset[j])
+    UKestimate, UKvar = predict(unikrig, :z, pset[j])
+    DKestimate, DKvar = predict(drikrig, :z, pset[j])
 
     # estimate checks
     @test SKestimate ≈ data[:z][j]
@@ -36,23 +36,23 @@
 
   # save results on a particular location pₒ
   pₒ = rand(Point3)
-  SKestimate, SKvar = predict(simkrig, pₒ)
-  OKestimate, OKvar = predict(ordkrig, pₒ)
-  UKestimate, UKvar = predict(unikrig, pₒ)
-  DKestimate, DKvar = predict(driftkrig, pₒ)
+  SKestimate, SKvar = predict(simkrig, :z, pₒ)
+  OKestimate, OKvar = predict(ordkrig, :z, pₒ)
+  UKestimate, UKvar = predict(unikrig, :z, pₒ)
+  DKestimate, DKvar = predict(drikrig, :z, pₒ)
 
   # Kriging is translation-invariant
   h = rand(Vec3)
   pset_h = PointSet([pset[i] + h for i in 1:nelements(pset)])
   data_h = georef((z=data[:z],), pset_h)
-  simkrig_h = SimpleKriging(data_h, :z, γ, mean(data_h[:z]))
-  ordkrig_h = OrdinaryKriging(data_h, :z, γ)
-  unikrig_h = UniversalKriging(data_h, :z, γ, 1)
-  driftkrig_h = ExternalDriftKriging(data_h, :z, γ, [x->1.])
-  SKestimate_h, SKvar_h = predict(simkrig_h, pₒ + h)
-  OKestimate_h, OKvar_h = predict(ordkrig_h, pₒ + h)
-  UKestimate_h, UKvar_h = predict(unikrig_h, pₒ + h)
-  DKestimate_h, DKvar_h = predict(driftkrig_h, pₒ + h)
+  simkrig_h = SimpleKriging(data_h, γ, mean(data_h[:z]))
+  ordkrig_h = OrdinaryKriging(data_h, γ)
+  unikrig_h = UniversalKriging(data_h, γ, 1)
+  drikrig_h = ExternalDriftKriging(data_h, γ, [x->1.])
+  SKestimate_h, SKvar_h = predict(simkrig_h, :z, pₒ + h)
+  OKestimate_h, OKvar_h = predict(ordkrig_h, :z, pₒ + h)
+  UKestimate_h, UKvar_h = predict(unikrig_h, :z, pₒ + h)
+  DKestimate_h, DKvar_h = predict(drikrig_h, :z, pₒ + h)
   @test SKestimate_h ≈ SKestimate
   @test SKvar_h ≈ SKvar
   @test OKestimate_h ≈ OKestimate
@@ -66,14 +66,14 @@
   # Kriging variance is multiplied by the same factor
   α = rand()
   γ_α = GaussianVariogram(sill=α, range=1., nugget=0.)
-  simkrig_α = SimpleKriging(data, :z, γ_α, mean(data[:z]))
-  ordkrig_α = OrdinaryKriging(data, :z, γ_α)
-  unikrig_α = UniversalKriging(data, :z, γ_α, 1)
-  driftkrig_α = ExternalDriftKriging(data, :z, γ_α, [x->1.])
-  SKestimate_α, SKvar_α = predict(simkrig_α, pₒ)
-  OKestimate_α, OKvar_α = predict(ordkrig_α, pₒ)
-  UKestimate_α, UKvar_α = predict(unikrig_α, pₒ)
-  DKestimate_α, DKvar_α = predict(driftkrig_α, pₒ)
+  simkrig_α = SimpleKriging(data, γ_α, mean(data[:z]))
+  ordkrig_α = OrdinaryKriging(data, γ_α)
+  unikrig_α = UniversalKriging(data, γ_α, 1)
+  drikrig_α = ExternalDriftKriging(data, γ_α, [x->1.])
+  SKestimate_α, SKvar_α = predict(simkrig_α, :z, pₒ)
+  OKestimate_α, OKvar_α = predict(ordkrig_α, :z, pₒ)
+  UKestimate_α, UKvar_α = predict(unikrig_α, :z, pₒ)
+  DKestimate_α, DKvar_α = predict(drikrig_α, :z, pₒ)
   @test SKestimate_α ≈ SKestimate
   @test SKvar_α ≈ α*SKvar
   @test OKestimate_α ≈ OKestimate
@@ -86,42 +86,42 @@
   # Kriging variance is a function of data configuration, not data values
   δ = rand(nobs)
   data_δ = georef((z=data[:z].+δ,), pset)
-  simkrig_δ = SimpleKriging(data_δ, :z, γ, mean(data_δ[:z]))
-  ordkrig_δ = OrdinaryKriging(data_δ, :z, γ)
-  unikrig_δ = UniversalKriging(data_δ, :z, γ, 1)
-  driftkrig_δ = ExternalDriftKriging(data_δ, :z, γ, [x->1.])
-  SKestimate_δ, SKvar_δ = predict(simkrig_δ, pₒ)
-  OKestimate_δ, OKvar_δ = predict(ordkrig_δ, pₒ)
-  UKestimate_δ, UKvar_δ = predict(unikrig_δ, pₒ)
-  DKestimate_δ, DKvar_δ = predict(driftkrig_δ, pₒ)
+  simkrig_δ = SimpleKriging(data_δ, γ, mean(data_δ[:z]))
+  ordkrig_δ = OrdinaryKriging(data_δ, γ)
+  unikrig_δ = UniversalKriging(data_δ, γ, 1)
+  drikrig_δ = ExternalDriftKriging(data_δ, γ, [x->1.])
+  SKestimate_δ, SKvar_δ = predict(simkrig_δ, :z, pₒ)
+  OKestimate_δ, OKvar_δ = predict(ordkrig_δ, :z, pₒ)
+  UKestimate_δ, UKvar_δ = predict(unikrig_δ, :z, pₒ)
+  DKestimate_δ, DKvar_δ = predict(drikrig_δ, :z, pₒ)
   @test SKvar_δ ≈ SKvar
   @test OKvar_δ ≈ OKvar
   @test UKvar_δ ≈ UKvar
   @test DKvar_δ ≈ DKvar
 
   # Ordinary Kriging ≡ Universal Kriging with 0th degree drift
-  unikrig_0th = UniversalKriging(data, :z, γ, 0)
-  OKestimate, OKvar = predict(ordkrig, pₒ)
-  UKestimate, UKvar = predict(unikrig_0th, pₒ)
+  unikrig_0th = UniversalKriging(data, γ, 0)
+  OKestimate, OKvar = predict(ordkrig, :z, pₒ)
+  UKestimate, UKvar = predict(unikrig_0th, :z, pₒ)
   @test OKestimate ≈ UKestimate
   @test OKvar ≈ UKvar
 
   # Ordinary Kriging ≡ Kriging with constant external drift
-  driftkrig_const = ExternalDriftKriging(data, :z, γ, [x->1.])
-  OKestimate, OKvar = predict(ordkrig, pₒ)
-  DKestimate, DKvar = predict(driftkrig_const, pₒ)
+  driftkrig_const = ExternalDriftKriging(data, γ, [x->1.])
+  OKestimate, OKvar = predict(ordkrig, :z, pₒ)
+  DKestimate, DKvar = predict(driftkrig_const, :z, pₒ)
   @test OKestimate ≈ DKestimate
   @test OKvar ≈ DKvar
 
   # Non-stationary variograms are allowed
   γ_ns = PowerVariogram()
-  ordkrig_ns = OrdinaryKriging(data, :z, γ_ns)
-  unikrig_ns = UniversalKriging(data, :z, γ_ns, 1)
-  driftkrig_ns = ExternalDriftKriging(data, :z, γ_ns, [x->1.])
+  ordkrig_ns = OrdinaryKriging(data, γ_ns)
+  unikrig_ns = UniversalKriging(data, γ_ns, 1)
+  drikrig_ns = ExternalDriftKriging(data, γ_ns, [x->1.])
   for j in 1:nobs
-    OKestimate, OKvar = predict(ordkrig_ns, pset[j])
-    UKestimate, UKvar = predict(unikrig_ns, pset[j])
-    DKestimate, DKvar = predict(driftkrig_ns, pset[j])
+    OKestimate, OKvar = predict(ordkrig_ns, :z, pset[j])
+    UKestimate, UKvar = predict(unikrig_ns, :z, pset[j])
+    DKestimate, DKvar = predict(drikrig_ns, :z, pset[j])
 
     # estimate checks
     @test OKestimate ≈ data[:z][j]
@@ -146,23 +146,23 @@
   pₒ_f        = rand(Point{dim,Float32})
   pₒ_d        = convert(Point{dim,Float64}, pₒ_f)
   γ_f         = GaussianVariogram(sill=1f0, range=1f0, nugget=0f0)
-  simkrig_f   = SimpleKriging(data_f, :z, γ_f, mean(data_f[:z]))
-  ordkrig_f   = OrdinaryKriging(data_f, :z, γ_f)
-  unikrig_f   = UniversalKriging(data_f, :z, γ_f, 1)
-  driftkrig_f = ExternalDriftKriging(data_f, :z, γ_f, [x->1f0])
+  simkrig_f   = SimpleKriging(data_f, γ_f, mean(data_f[:z]))
+  ordkrig_f   = OrdinaryKriging(data_f, γ_f)
+  unikrig_f   = UniversalKriging(data_f, γ_f, 1)
+  drikrig_f   = ExternalDriftKriging(data_f, γ_f, [x->1f0])
   γ_d         = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig_d   = SimpleKriging(data_d, :z, γ_d, mean(data_d[:z]))
-  ordkrig_d   = OrdinaryKriging(data_d, :z, γ_d)
-  unikrig_d   = UniversalKriging(data_d, :z, γ_d, 1)
-  driftkrig_d = ExternalDriftKriging(data_d, :z, γ_d, [x->1.])
-  SKestimate_f, SKvar_f = predict(simkrig_f, pₒ_f)
-  OKestimate_f, OKvar_f = predict(ordkrig_f, pₒ_f)
-  UKestimate_f, UKvar_f = predict(unikrig_f, pₒ_f)
-  DKestimate_f, DKvar_f = predict(driftkrig_f, pₒ_f)
-  SKestimate_d, SKvar_d = predict(simkrig_d, pₒ_d)
-  OKestimate_d, OKvar_d = predict(ordkrig_d, pₒ_d)
-  UKestimate_d, UKvar_d = predict(unikrig_d, pₒ_d)
-  DKestimate_d, DKvar_d = predict(driftkrig_d, pₒ_d)
+  simkrig_d   = SimpleKriging(data_d, γ_d, mean(data_d[:z]))
+  ordkrig_d   = OrdinaryKriging(data_d, γ_d)
+  unikrig_d   = UniversalKriging(data_d, γ_d, 1)
+  drikrig_d = ExternalDriftKriging(data_d, γ_d, [x->1.])
+  SKestimate_f, SKvar_f = predict(simkrig_f, :z, pₒ_f)
+  OKestimate_f, OKvar_f = predict(ordkrig_f, :z, pₒ_f)
+  UKestimate_f, UKvar_f = predict(unikrig_f, :z, pₒ_f)
+  DKestimate_f, DKvar_f = predict(drikrig_f, :z, pₒ_f)
+  SKestimate_d, SKvar_d = predict(simkrig_d, :z, pₒ_d)
+  OKestimate_d, OKvar_d = predict(ordkrig_d, :z, pₒ_d)
+  UKestimate_d, UKvar_d = predict(unikrig_d, :z, pₒ_d)
+  DKestimate_d, DKvar_d = predict(drikrig_d, :z, pₒ_d)
   @test isapprox(SKestimate_f, SKestimate_d, atol=1e-4)
   @test isapprox(SKvar_f, SKvar_d, atol=1e-4)
   @test isapprox(OKestimate_f, OKestimate_d, atol=1e-4)
@@ -183,17 +183,17 @@
 
   # basic estimators
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig = SimpleKriging(data, :z, γ, mean(data[:z]))
-  ordkrig = OrdinaryKriging(data, :z, γ)
-  unikrig = UniversalKriging(data, :z, γ, 1)
-  driftkrig = ExternalDriftKriging(data, :z, γ, [x->1.])
+  simkrig = SimpleKriging(data, γ, mean(data[:z]))
+  ordkrig = OrdinaryKriging(data, γ)
+  unikrig = UniversalKriging(data, γ, 1)
+  drikrig = ExternalDriftKriging(data, γ, [x->1.])
 
   # prediction on a quadrangle
   uₒ = Quadrangle((0.,0.), (1.,0.), (1.,1.), (0.,1.))
-  _, SKvar = predict(simkrig, uₒ)
-  _, OKvar = predict(ordkrig, uₒ)
-  _, UKvar = predict(unikrig, uₒ)
-  _, DKvar = predict(driftkrig, uₒ)
+  _, SKvar = predict(simkrig, :z, uₒ)
+  _, OKvar = predict(ordkrig, :z, uₒ)
+  _, UKvar = predict(unikrig, :z, uₒ)
+  _, DKvar = predict(drikrig, :z, uₒ)
 
   # variance checks
   @test SKvar + tol ≥ 0

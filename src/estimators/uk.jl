@@ -4,13 +4,12 @@
 
 """
     UniversalKriging(γ, degree, dim)
-    UniversalKriging(X, z, γ, degree)
+    UniversalKriging(data, γ, degree)
 
 Universal Kriging with variogram model `γ` and polynomial
 `degree` on a spatial domain of dimension `dim`.
 
-Optionally, pass the coordinates `X` and values `z`
-to the [`fit`](@ref) function.
+Optionally, pass the geospatial `data` to the [`fit`](@ref) function.
 
 ### Notes
 
@@ -33,8 +32,8 @@ end
 
 UniversalKriging(γ, degree, dim) = UniversalKriging{typeof(γ)}(γ, degree, dim)
 
-UniversalKriging(data, var, γ, degree) =
-  GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(data)), data, var)
+UniversalKriging(data::Data, γ, degree) =
+  GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(data)), data)
 
 function UKexps(degree::Int, dim::Int)
   # multinomial expansion

@@ -10,14 +10,13 @@ A Kriging estimator (e.g. Simple Kriging).
 abstract type KrigingEstimator end
 
 """
-    KrigingState(data, var, LHS, RHS)
+    KrigingState(data, LHS, RHS)
 
 A Kriging state stores information needed
 to perform estimation at any given location.
 """
 mutable struct KrigingState{D<:Data,F<:Factorization,R}
   data::D
-  var::Symbol
   LHS::F
   RHS::Vector{R}
 end
@@ -56,12 +55,11 @@ status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
 #--------------
 
 """
-    fit(estimator, data, var)
+    fit(estimator, data)
 
-Build Kriging system from `data` and variable `var`
-and return a fitted estimator.
+Build Kriging system from `data` and return a fitted estimator.
 """
-function fit(estimator::KrigingEstimator, data, var)
+function fit(estimator::KrigingEstimator, data)
   # build Kriging system
   LHS = lhs(estimator, domain(data))
   RHS = Vector{eltype(LHS)}(undef, size(LHS,1))
@@ -70,7 +68,7 @@ function fit(estimator::KrigingEstimator, data, var)
   FLHS = factorize(estimator, LHS)
 
   # record Kriging state
-  state = KrigingState(data, var, FLHS, RHS)
+  state = KrigingState(data, FLHS, RHS)
 
   # return fitted estimator
   FittedKriging(estimator, state)
@@ -132,14 +130,13 @@ function factorize end
 #-----------------
 
 """
-    predict(estimator, uₒ)
+    predict(estimator, var, uₒ)
 
-Compute mean and variance for the `estimator` at point or
-geometry `uₒ`.
+Compute mean and variance of variable `var` using the
+`estimator` at point or geometry `uₒ`.
 """
-function predict(fitted::FittedKriging, uₒ)
+function predict(fitted::FittedKriging, var, uₒ)
   data = fitted.state.data
-  var  = fitted.state.var
   combine(fitted, weights(fitted, uₒ), data[var])
 end
 

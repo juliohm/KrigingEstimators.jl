@@ -4,12 +4,11 @@
 
 """
     SimpleKriging(γ, μ)
-    SimpleKriging(X, z, γ, μ)
+    SimpleKriging(data, γ, μ)
 
 Simple Kriging with variogram model `γ` and constant mean `μ`.
 
-Optionally, pass the coordinates `X` and values `z`
-to the [`fit`](@ref) function.
+Optionally, pass the geospatial `data` to the [`fit`](@ref) function.
 
 ### Notes
 
@@ -28,7 +27,7 @@ end
 
 SimpleKriging(γ, μ) = SimpleKriging{typeof(γ),typeof(μ)}(γ, μ)
 
-SimpleKriging(data, var, γ, μ) = GeoStatsBase.fit(SimpleKriging(γ, μ), data, var)
+SimpleKriging(data, γ, μ) = GeoStatsBase.fit(SimpleKriging(γ, μ), data)
 
 nconstraints(::SimpleKriging) = 0
 

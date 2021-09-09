@@ -4,12 +4,11 @@
 
 """
     OrdinaryKriging(γ)
-    OrdinaryKriging(X, z, γ)
+    OrdinaryKriging(data, γ)
 
 Ordinary Kriging with variogram model `γ`.
 
-Optionally, pass the coordinates `X` and values `z`
-to the [`fit`](@ref) function.
+Optionally, pass the geospatial `data` to the [`fit`](@ref) function.
 """
 struct OrdinaryKriging{G<:Variogram} <: KrigingEstimator
   γ::G
@@ -17,7 +16,7 @@ end
 
 OrdinaryKriging(γ) = OrdinaryKriging{typeof(γ)}(γ)
 
-OrdinaryKriging(data, var, γ) = GeoStatsBase.fit(OrdinaryKriging(γ), data, var)
+OrdinaryKriging(data, γ) = GeoStatsBase.fit(OrdinaryKriging(γ), data)
 
 nconstraints(::OrdinaryKriging) = 1
 
