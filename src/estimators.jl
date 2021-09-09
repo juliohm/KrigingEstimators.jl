@@ -169,17 +169,13 @@ Set RHS of Kriging system at point or geometry `uₒ`.
 function set_rhs!(fitted::FittedKriging, uₒ)
   γ = fitted.estimator.γ
   dom = domain(fitted.state.data)
+  nel = nelements(dom)
   RHS = fitted.state.RHS
 
   # RHS variogram/covariance
-  for j in 1:nelements(dom)
-    @inbounds RHS[j] = γ(dom[j], uₒ)
-  end
+  RHS[1:nel] .= map(u -> γ(u, uₒ), dom)
   if isstationary(γ)
-    σ² = sill(γ)
-    for j in 1:nelements(dom)
-      @inbounds RHS[j] = σ² - RHS[j]
-    end
+    RHS[1:nel] .= sill(γ) .- RHS[1:nel]
   end
 
   set_constraints_rhs!(fitted, uₒ)
