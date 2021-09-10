@@ -191,7 +191,8 @@ function set_constraints_rhs! end
 """
     combine(estimator, weights, z)
 
-Combine `weights` with values `z` to produce mean and variance.
+Combine `weights` with values `z` to produce mean and variance
+using the appropriate formulas for the `estimator`.
 """
 function combine(fitted::FittedKriging,
                  weights::KrigingWeights,

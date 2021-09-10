@@ -24,6 +24,7 @@ export
   OrdinaryKriging,
   UniversalKriging,
   ExternalDriftKriging,
-  fit, predict, status, weights
+  fit, predict, status,
+  weights, combine
 
 end
