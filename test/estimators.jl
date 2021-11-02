@@ -154,7 +154,7 @@
   simkrig_d   = SimpleKriging(data_d, γ_d, mean(data_d[:z]))
   ordkrig_d   = OrdinaryKriging(data_d, γ_d)
   unikrig_d   = UniversalKriging(data_d, γ_d, 1)
-  drikrig_d = ExternalDriftKriging(data_d, γ_d, [x->1.])
+  drikrig_d   = ExternalDriftKriging(data_d, γ_d, [x->1.])
   SKestimate_f, SKvar_f = predict(simkrig_f, :z, pₒ_f)
   OKestimate_f, OKvar_f = predict(ordkrig_f, :z, pₒ_f)
   UKestimate_f, UKvar_f = predict(unikrig_f, :z, pₒ_f)
