@@ -209,9 +209,9 @@ function combine(fitted::FittedKriging,
   c = c₁ + c₂
 
   if isstationary(γ)
-    z⋅λ, sill(γ) - c
+    sum(λ.*z), sill(γ) - c
   else
-    z⋅λ, c
+    sum(λ.*z), c
   end
 end
 
