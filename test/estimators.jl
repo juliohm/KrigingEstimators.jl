@@ -210,7 +210,7 @@
   dim = 2; nobs = 10
   pset = PointSet(10*rand(dim, nobs))
   table = (z=rand(Composition{3}, nobs),)
-  data = georef(table, pset);
+  data = georef(table, pset)
 
   # basic estimators
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
