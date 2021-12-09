@@ -43,7 +43,7 @@ function combine(fitted::FittedKriging{<:SimpleKriging},
   μ = fitted.estimator.μ
   b = fitted.state.RHS
   λ = weights.λ
-  y = map(z->z-μ,z)
+  y = [zᵢ - μ for zᵢ in z]
 
   μ + sum(λ.*y), sill(γ) - b⋅λ
 end
