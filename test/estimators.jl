@@ -226,17 +226,17 @@
   UKpred, UKvar = predict(unikrig, :z, uₒ)
   DKpred, DKvar = predict(drikrig, :z, uₒ)
 
+  # type tests
+  @test SKpred isa Composition
+  @test OKpred isa Composition
+  @test UKpred isa Composition
+  @test DKpred isa Composition
+  
   # variance checks
   @test SKvar + tol ≥ 0
   @test OKvar + tol ≥ 0
   @test UKvar + tol ≥ 0
   @test DKvar + tol ≥ 0
   @test SKvar ≤ OKvar + tol
-
-  # type tests
-  @test SKpred isa Composition
-  @test OKpred isa Composition
-  @test UKpred isa Composition
-  @test DKpred isa Composition
 
 end
