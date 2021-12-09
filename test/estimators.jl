@@ -238,5 +238,4 @@
   @test UKvar + tol ≥ 0
   @test DKvar + tol ≥ 0
   @test SKvar ≤ OKvar + tol
-
 end
