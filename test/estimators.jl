@@ -201,4 +201,36 @@
   @test UKvar + tol ≥ 0
   @test DKvar + tol ≥ 0
   @test SKvar ≤ OKvar + tol
+
+  # ------------------
+  # COMPOSITIONAL DATA
+  # ------------------
+
+  # create some data
+  dim = 2; nobs = 10; elements = 4;
+  pset = PointSet(10*rand(dim, nobs));
+  #data = georef((z=[rand(elements) for r in 1:nobs],), pset)
+  data = georef((z=[Composition(rand(elements)) for r in 1:nobs],), pset);
+
+  # basic estimators
+  γ = GaussianVariogram(sill=1., range=1., nugget=0.)
+  simkrig = SimpleKriging(data, γ, mean(data[:z]))
+  ordkrig = OrdinaryKriging(data, γ)
+  unikrig = UniversalKriging(data, γ, 1)
+  drikrig = ExternalDriftKriging(data, γ, [x->1.])
+
+  # prediction on a quadrangle
+  uₒ = Quadrangle((0.,0.), (1.,0.), (1.,1.), (0.,1.))
+  _, SKvar = predict(simkrig, :z, uₒ)
+  _, OKvar = predict(ordkrig, :z, uₒ)
+  _, UKvar = predict(unikrig, :z, uₒ)
+  _, DKvar = predict(drikrig, :z, uₒ)
+
+  # variance checks
+  @test SKvar + tol ≥ 0
+  @test OKvar + tol ≥ 0
+  @test UKvar + tol ≥ 0
+  @test DKvar + tol ≥ 0
+  @test SKvar ≤ OKvar + tol
+
 end
