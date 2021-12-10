@@ -64,7 +64,7 @@
 
   # Kriging estimate is invariant under covariance scaling
   # Kriging variance is multiplied by the same factor
-  α = rand()
+  α = 2.0
   γ_α = GaussianVariogram(sill=α, range=1., nugget=0.)
   simkrig_α = SimpleKriging(data, γ_α, mean(data[:z]))
   ordkrig_α = OrdinaryKriging(data, γ_α)
