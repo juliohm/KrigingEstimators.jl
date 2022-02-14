@@ -13,7 +13,7 @@ Variography = "04a0146e-e6df-5636-8d7f-62fa9eb0b20c"
 
 [compat]
 Combinatorics = "0.7, 1.0"
-GeoStatsBase = "0.23, 0.24"
+GeoStatsBase = "0.23, 0.24, 0.25"
 Meshes = "0.18, 0.19, 0.20"
 Variography = "0.13, 0.14"
 julia = "1.6"
