@@ -3,6 +3,7 @@ using Meshes
 using GeoStatsBase
 using Variography
 using CoDa
+using Unitful
 using LinearAlgebra
 using Statistics
 using Plots; gr(size=(600,400))

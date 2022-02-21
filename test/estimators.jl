@@ -238,4 +238,20 @@
   @test UKvar + tol ≥ 0
   @test DKvar + tol ≥ 0
   @test SKvar ≤ OKvar + tol
+
+  # create some unitful data
+  dim = 3; nobs = 10
+  pset = PointSet(10*rand(dim, nobs))
+  data = georef((z=rand(nobs)*u"K",), pset)
+
+  γ  = GaussianVariogram(sill=1.0u"K^2")
+  sk = SimpleKriging(data, γ, mean(data.z))
+  ok = OrdinaryKriging(data, γ)
+  uk = UniversalKriging(data, γ, 1)
+  dk = ExternalDriftKriging(data, γ, [x->1.])
+  for _k in [sk, ok, uk, dk]
+    μ, σ² = predict(dk, :z, Point(0.,0.,0.))
+    @test unit(μ) == u"K"
+    @test unit(σ²) == u"K^2"
+  end
 end

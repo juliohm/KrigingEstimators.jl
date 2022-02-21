@@ -10,15 +10,16 @@ A Kriging estimator (e.g. Simple Kriging).
 abstract type KrigingEstimator end
 
 """
-    KrigingState(data, LHS, RHS)
+    KrigingState(data, LHS, RHS, VARTYPE)
 
 A Kriging state stores information needed
 to perform estimation at any given location.
 """
-mutable struct KrigingState{D<:Data,F<:Factorization,R}
+mutable struct KrigingState{D<:Data,F<:Factorization,T,V}
   data::D
   LHS::F
-  RHS::Vector{R}
+  RHS::Vector{T}
+  VARTYPE::V
 end
 
 """
@@ -60,15 +61,22 @@ status(fittedkrig::FittedKriging) = issuccess(fittedkrig.state.LHS)
 Build Kriging system from `data` and return a fitted estimator.
 """
 function fit(estimator::KrigingEstimator, data)
+  # variogram and domain
+  γ = estimator.γ
+  D = domain(data)
+
   # build Kriging system
-  LHS = lhs(estimator, domain(data))
+  LHS = lhs(estimator, D)
   RHS = Vector{eltype(LHS)}(undef, size(LHS,1))
 
   # factorize LHS
   FLHS = factorize(estimator, LHS)
 
+  # variance type
+  VARTYPE = Variography.result_type(γ, first(D), first(D))
+
   # record Kriging state
-  state = KrigingState(data, FLHS, RHS)
+  state = KrigingState(data, FLHS, RHS, VARTYPE)
 
   # return fitted estimator
   FittedKriging(estimator, state)
@@ -85,19 +93,22 @@ function lhs(estimator::KrigingEstimator, domain)
   ncon = nconstraints(estimator)
 
   # pre-allocate memory for LHS
-  u = first(domain)
-  R = Variography.result_type(γ, u, u)
-  m = nobs + ncon
-  LHS = Matrix{R}(undef, m, m)
+  u  = first(domain)
+  V² = Variography.result_type(γ, u, u)
+  m  = nobs + ncon
+  G  = Matrix{V²}(undef, m, m)
 
   # set variogram/covariance block
-  pairwise!(LHS, γ, domain)
+  pairwise!(G, γ, domain)
   if isstationary(γ)
     σ² = sill(γ)
     for j in 1:nobs, i in 1:nobs
-      @inbounds LHS[i,j] = σ² - LHS[i,j]
+      @inbounds G[i,j] = σ² - G[i,j]
     end
   end
+
+  # strip units if necessary
+  LHS = ustrip.(G)
 
   # set blocks of constraints
   set_constraints_lhs!(estimator, LHS, domain)
@@ -173,9 +184,11 @@ function set_rhs!(fitted::FittedKriging, uₒ)
   RHS = fitted.state.RHS
 
   # RHS variogram/covariance
-  RHS[1:nel] .= map(u -> γ(u, uₒ), dom)
+  g = map(u -> γ(u, uₒ), dom)
+  RHS[1:nel] .= ustrip.(g)
   if isstationary(γ)
-    RHS[1:nel] .= sill(γ) .- RHS[1:nel]
+    σ² = ustrip(sill(γ))
+    RHS[1:nel] .= σ² .- RHS[1:nel]
   end
 
   set_constraints_rhs!(fitted, uₒ)
@@ -197,21 +210,23 @@ using the appropriate formulas for the `estimator`.
 function combine(fitted::FittedKriging,
                  weights::KrigingWeights,
                  z::AbstractVector)
-  γ = fitted.estimator.γ
-  b = fitted.state.RHS
-  λ = weights.λ
-  ν = weights.ν
+  γ  = fitted.estimator.γ
+  b  = fitted.state.RHS
+  V² = fitted.state.VARTYPE
+  λ  = weights.λ
+  ν  = weights.ν
 
   # compute b⋅[λ;ν]
-  nobs  = length(λ)
+  nobs = length(λ)
   c₁ = view(b, 1:nobs) ⋅ λ
   c₂ = view(b, nobs+1:length(b)) ⋅ ν
   c = c₁ + c₂
 
   if isstationary(γ)
-    sum(λ.*z), sill(γ) - c
+    σ² = sill(γ)
+    sum(λ.*z), σ² - V²(c)
   else
-    sum(λ.*z), c
+    sum(λ.*z), V²(c)
   end
 end
 

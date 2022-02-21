@@ -9,11 +9,13 @@ GeoStatsBase = "323cb8eb-fbf6-51c0-afd0-f8fba70507b2"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 Variography = "04a0146e-e6df-5636-8d7f-62fa9eb0b20c"
 
 [compat]
 Combinatorics = "0.7, 1.0"
 GeoStatsBase = "0.23, 0.24, 0.25"
 Meshes = "0.18, 0.19, 0.20, 0.21"
+Unitful = "1.11"
 Variography = "0.13, 0.14"
 julia = "1.6"

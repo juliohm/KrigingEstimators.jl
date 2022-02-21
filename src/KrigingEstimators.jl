@@ -11,6 +11,7 @@ using Variography
 using LinearAlgebra: Factorization, Symmetric
 using LinearAlgebra: bunchkaufman, cholesky, issuccess, ⋅
 using Combinatorics: multiexponents
+using Unitful
 
 import GeoStatsBase: fit, predict, status
 import GeoStatsBase: solve
