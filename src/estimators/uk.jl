@@ -76,11 +76,8 @@ function set_constraints_rhs!(fitted::FittedKriging{<:UniversalKriging}, uₒ)
   nobs = nelements(fitted.state.data)
   nterms = size(exponents, 2)
 
-  # retrieve centroid
-  cₒ = uₒ isa Point ? uₒ : centroid(uₒ)
-
   # set polynomial drift
-  xₒ = coordinates(cₒ)
+  xₒ = coordinates(centroid(uₒ))
   for j in 1:nterms
     RHS[nobs+j] = prod(xₒ.^exponents[:,j])
   end
