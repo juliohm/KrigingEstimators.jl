@@ -7,7 +7,7 @@
 
 A Kriging estimator (e.g. Simple Kriging).
 """
-abstract type KrigingEstimator end
+abstract type KrigingEstimator <: Estimator end
 
 """
     KrigingState(data, LHS, RHS, VARTYPE)
