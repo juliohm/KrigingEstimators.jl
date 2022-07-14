@@ -7,7 +7,7 @@
 
 A Kriging estimator (e.g. Simple Kriging).
 """
-abstract type KrigingEstimator <: Estimator end
+abstract type KrigingEstimator <: ProbabilisticEstimator end
 
 """
     KrigingState(data, LHS, RHS, VARTYPE)
@@ -149,7 +149,20 @@ Compute mean and variance of variable `var` using the
 """
 function predict(fitted::FittedKriging, var, uₒ)
   data = fitted.state.data
-  combine(fitted, weights(fitted, uₒ), data[var])
+  ws   = weights(fitted, uₒ)
+  vs   = data[var]
+  combine(fitted, ws, vs)
+end
+
+"""
+    predictprob(estimator, var, uₒ)
+
+Compute the `Normal` distribution with Kriging mean and
+variance obtained with `predict`.
+"""
+function predictprob(fitted::FittedKriging, var, uₒ)
+  μ, σ² = predict(fitted, var, uₒ)
+  Normal(μ, √σ²)
 end
 
 """

@@ -11,9 +11,10 @@ using Variography
 using LinearAlgebra: Factorization, Symmetric
 using LinearAlgebra: bunchkaufman, cholesky, issuccess, ⋅
 using Combinatorics: multiexponents
+using Distributions: Normal
 using Unitful
 
-import GeoStatsBase: fit, predict, status
+import GeoStatsBase: fit, predict, predictprob, status
 import GeoStatsBase: solve
 
 include("estimators.jl")

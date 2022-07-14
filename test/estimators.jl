@@ -254,4 +254,32 @@
     @test unit(μ) == u"K"
     @test unit(σ²) == u"K^2"
   end
+
+  # probabilistic predictions
+  dim = 3; nobs = 10
+  pset = PointSet(10*rand(dim, nobs))
+  data = georef((z=rand(nobs),), pset)
+
+  γ = GaussianVariogram(sill=1., range=1., nugget=0.)
+  sk = SimpleKriging(data, γ, mean(data[:z]))
+  ok = OrdinaryKriging(data, γ)
+  uk = UniversalKriging(data, γ, 1)
+  dk = ExternalDriftKriging(data, γ, [x->1.])
+
+  skpred = predict(sk, :z, Point3(5.,5.,5.))
+  okpred = predict(ok, :z, Point3(5.,5.,5.))
+  ukpred = predict(uk, :z, Point3(5.,5.,5.))
+  dkpred = predict(dk, :z, Point3(5.,5.,5.))
+  skprob = predictprob(sk, :z, Point3(5.,5.,5.))
+  okprob = predictprob(ok, :z, Point3(5.,5.,5.))
+  ukprob = predictprob(uk, :z, Point3(5.,5.,5.))
+  dkprob = predictprob(dk, :z, Point3(5.,5.,5.))
+  @test mean(skprob) ≈ first(skpred)
+  @test mean(okprob) ≈ first(okpred)
+  @test mean(ukprob) ≈ first(ukpred)
+  @test mean(dkprob) ≈ first(dkpred)
+  @test var(skprob) ≈ last(skpred)
+  @test var(okprob) ≈ last(okpred)
+  @test var(ukprob) ≈ last(ukpred)
+  @test var(dkprob) ≈ last(dkpred)
 end
