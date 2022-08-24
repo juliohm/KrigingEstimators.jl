@@ -18,6 +18,7 @@ import GeoStatsBase: fit, predict, predictprob, status
 import GeoStatsBase: solve
 
 include("estimators.jl")
+include("ui.jl")
 
 export
   # estimators
@@ -27,6 +28,9 @@ export
   UniversalKriging,
   ExternalDriftKriging,
   fit, predict, status,
-  weights, combine
+  weights, combine,
+
+  # UI elements
+  kriging_ui
 
 end
