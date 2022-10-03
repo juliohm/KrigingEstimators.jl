@@ -133,9 +133,11 @@ function set_constraints_lhs! end
 """
     factorize(estimator, LHS)
 
-Factorize LHS of Kriging system with appropriate factorization method.
+Factorize LHS of Kriging system with appropriate
+factorization method.
 """
-function factorize end
+factorize(::KrigingEstimator, LHS) =
+  bunchkaufman(Symmetric(LHS), check=false)
 
 #-----------------
 # PREDICTION STEP

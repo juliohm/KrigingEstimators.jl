@@ -50,8 +50,6 @@ function set_constraints_lhs!(estimator::ExternalDriftKriging, LHS::AbstractMatr
   nothing
 end
 
-factorize(::ExternalDriftKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
-
 function set_constraints_rhs!(fitted::FittedKriging{<:ExternalDriftKriging}, uₒ)
   drifts = fitted.estimator.drifts
   RHS = fitted.state.RHS

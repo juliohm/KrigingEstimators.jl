@@ -28,9 +28,7 @@ function set_constraints_lhs!(::OrdinaryKriging, LHS::AbstractMatrix, domain)
   nothing
 end
 
-factorize(::OrdinaryKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
-
-function set_constraints_rhs!(fitted::FittedKriging{<:OrdinaryKriging}, pₒ)
+function set_constraints_rhs!(fitted::FittedKriging{<:OrdinaryKriging}, uₒ)
   RHS = fitted.state.RHS
   RHS[end] = one(eltype(RHS))
   nothing

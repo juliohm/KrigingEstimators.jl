@@ -68,8 +68,6 @@ function set_constraints_lhs!(estimator::UniversalKriging, LHS::AbstractMatrix, 
   nothing
 end
 
-factorize(::UniversalKriging, LHS::AbstractMatrix) = bunchkaufman(Symmetric(LHS), check=false)
-
 function set_constraints_rhs!(fitted::FittedKriging{<:UniversalKriging}, uₒ)
   exponents = fitted.estimator.exponents
   RHS = fitted.state.RHS

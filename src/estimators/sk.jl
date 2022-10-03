@@ -33,9 +33,7 @@ nconstraints(::SimpleKriging) = 0
 
 set_constraints_lhs!(::SimpleKriging, LHS::AbstractMatrix, domain) = nothing
 
-factorize(::SimpleKriging, LHS::AbstractMatrix) = cholesky(Symmetric(LHS), check=false)
-
-set_constraints_rhs!(::FittedKriging{<:SimpleKriging}, pₒ) = nothing
+set_constraints_rhs!(::FittedKriging{<:SimpleKriging}, uₒ) = nothing
 
 function combine(fitted::FittedKriging{<:SimpleKriging},
                  weights::KrigingWeights, z::AbstractVector)
