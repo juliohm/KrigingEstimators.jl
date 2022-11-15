@@ -8,7 +8,7 @@
   data = georef((z=rand(nobs),), pset)
 
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig = SimpleKriging(data, γ, mean(data[:z]))
+  simkrig = SimpleKriging(data, γ, mean(data.z))
   ordkrig = OrdinaryKriging(data, γ)
   unikrig = UniversalKriging(data, γ, 1)
   drikrig = ExternalDriftKriging(data, γ, [x->1.])
@@ -21,10 +21,10 @@
     DKestimate, DKvar = predict(drikrig, :z, pset[j])
 
     # estimate checks
-    @test SKestimate ≈ data[:z][j]
-    @test OKestimate ≈ data[:z][j]
-    @test UKestimate ≈ data[:z][j]
-    @test DKestimate ≈ data[:z][j]
+    @test SKestimate ≈ data.z[j]
+    @test OKestimate ≈ data.z[j]
+    @test UKestimate ≈ data.z[j]
+    @test DKestimate ≈ data.z[j]
 
     # variance checks
     @test SKvar + tol ≥ 0
@@ -44,8 +44,8 @@
   # Kriging is translation-invariant
   h = rand(Vec3)
   pset_h = PointSet([pset[i] + h for i in 1:nelements(pset)])
-  data_h = georef((z=data[:z],), pset_h)
-  simkrig_h = SimpleKriging(data_h, γ, mean(data_h[:z]))
+  data_h = georef((z=data.z,), pset_h)
+  simkrig_h = SimpleKriging(data_h, γ, mean(data_h.z))
   ordkrig_h = OrdinaryKriging(data_h, γ)
   unikrig_h = UniversalKriging(data_h, γ, 1)
   drikrig_h = ExternalDriftKriging(data_h, γ, [x->1.])
@@ -66,7 +66,7 @@
   # Kriging variance is multiplied by the same factor
   α = 2.0
   γ_α = GaussianVariogram(sill=α, range=1., nugget=0.)
-  simkrig_α = SimpleKriging(data, γ_α, mean(data[:z]))
+  simkrig_α = SimpleKriging(data, γ_α, mean(data.z))
   ordkrig_α = OrdinaryKriging(data, γ_α)
   unikrig_α = UniversalKriging(data, γ_α, 1)
   drikrig_α = ExternalDriftKriging(data, γ_α, [x->1.])
@@ -85,8 +85,8 @@
 
   # Kriging variance is a function of data configuration, not data values
   δ = rand(nobs)
-  data_δ = georef((z=data[:z].+δ,), pset)
-  simkrig_δ = SimpleKriging(data_δ, γ, mean(data_δ[:z]))
+  data_δ = georef((z=data.z .+ δ,), pset)
+  simkrig_δ = SimpleKriging(data_δ, γ, mean(data_δ.z))
   ordkrig_δ = OrdinaryKriging(data_δ, γ)
   unikrig_δ = UniversalKriging(data_δ, γ, 1)
   drikrig_δ = ExternalDriftKriging(data_δ, γ, [x->1.])
@@ -124,9 +124,9 @@
     DKestimate, DKvar = predict(drikrig_ns, :z, pset[j])
 
     # estimate checks
-    @test OKestimate ≈ data[:z][j]
-    @test UKestimate ≈ data[:z][j]
-    @test DKestimate ≈ data[:z][j]
+    @test OKestimate ≈ data.z[j]
+    @test UKestimate ≈ data.z[j]
+    @test DKestimate ≈ data.z[j]
 
     # variance checks
     @test OKvar + tol ≥ 0
@@ -146,12 +146,12 @@
   pₒ_f        = rand(Point{dim,Float32})
   pₒ_d        = convert(Point{dim,Float64}, pₒ_f)
   γ_f         = GaussianVariogram(sill=1f0, range=1f0, nugget=0f0)
-  simkrig_f   = SimpleKriging(data_f, γ_f, mean(data_f[:z]))
+  simkrig_f   = SimpleKriging(data_f, γ_f, mean(data_f.z))
   ordkrig_f   = OrdinaryKriging(data_f, γ_f)
   unikrig_f   = UniversalKriging(data_f, γ_f, 1)
   drikrig_f   = ExternalDriftKriging(data_f, γ_f, [x->1f0])
   γ_d         = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig_d   = SimpleKriging(data_d, γ_d, mean(data_d[:z]))
+  simkrig_d   = SimpleKriging(data_d, γ_d, mean(data_d.z))
   ordkrig_d   = OrdinaryKriging(data_d, γ_d)
   unikrig_d   = UniversalKriging(data_d, γ_d, 1)
   drikrig_d   = ExternalDriftKriging(data_d, γ_d, [x->1.])
@@ -183,7 +183,7 @@
 
   # basic estimators
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig = SimpleKriging(data, γ, mean(data[:z]))
+  simkrig = SimpleKriging(data, γ, mean(data.z))
   ordkrig = OrdinaryKriging(data, γ)
   unikrig = UniversalKriging(data, γ, 1)
   drikrig = ExternalDriftKriging(data, γ, [x->1.])
@@ -214,7 +214,7 @@
 
   # basic estimators
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
-  simkrig = SimpleKriging(data, γ, mean(data[:z]))
+  simkrig = SimpleKriging(data, γ, mean(data.z))
   ordkrig = OrdinaryKriging(data, γ)
   unikrig = UniversalKriging(data, γ, 1)
   drikrig = ExternalDriftKriging(data, γ, [x->1.])
@@ -261,7 +261,7 @@
   data = georef((z=rand(nobs),), pset)
 
   γ = GaussianVariogram(sill=1., range=1., nugget=0.)
-  sk = SimpleKriging(data, γ, mean(data[:z]))
+  sk = SimpleKriging(data, γ, mean(data.z))
   ok = OrdinaryKriging(data, γ)
   uk = UniversalKriging(data, γ, 1)
   dk = ExternalDriftKriging(data, γ, [x->1.])

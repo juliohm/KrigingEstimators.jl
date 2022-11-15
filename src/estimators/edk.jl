@@ -53,7 +53,7 @@ end
 function set_constraints_rhs!(fitted::FittedKriging{<:ExternalDriftKriging}, uₒ)
   drifts = fitted.estimator.drifts
   RHS = fitted.state.RHS
-  nobs = nelements(fitted.state.data)
+  nobs = nitems(fitted.state.data)
 
   # set external drift
   xₒ = coordinates(centroid(uₒ))

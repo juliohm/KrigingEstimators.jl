@@ -152,7 +152,7 @@ Compute mean and variance of variable `var` using the
 function predict(fitted::FittedKriging, var, uₒ)
   data = fitted.state.data
   ws   = weights(fitted, uₒ)
-  vs   = data[var]
+  vs   = getproperty(data, var)
   combine(fitted, ws, vs)
 end
 
@@ -174,7 +174,7 @@ Compute the weights λ (and Lagrange multipliers ν) for the
 `estimator` at point or geometry `uₒ`.
 """
 function weights(fitted::FittedKriging, uₒ)
-  nobs = nelements(fitted.state.data)
+  nobs = nitems(fitted.state.data)
 
   set_rhs!(fitted, uₒ)
 
