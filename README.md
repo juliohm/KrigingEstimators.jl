@@ -32,7 +32,7 @@ For examples of usage, please check the main documentation.
 
 If you have any questions, please contact our community on the [gitter channel](https://gitter.im/JuliaEarth/GeoStats.jl).
 
-[build-img]: https://img.shields.io/github/workflow/status/JuliaEarth/KrigingEstimators.jl/CI?style=flat-square
+[build-img]: https://img.shields.io/github/actions/workflow/status/JuliaEarth/KrigingEstimators.jl/CI.yml?branch=master&style=flat-square
 [build-url]: https://github.com/JuliaEarth/KrigingEstimators.jl/actions
 
 [codecov-img]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl/branch/master/graph/badge.svg
