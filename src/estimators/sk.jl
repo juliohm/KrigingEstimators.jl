@@ -35,16 +35,15 @@ set_constraints_lhs!(::SimpleKriging, LHS::AbstractMatrix, domain) = nothing
 
 set_constraints_rhs!(::FittedKriging{<:SimpleKriging}, uₒ) = nothing
 
-function combine(fitted::FittedKriging{<:SimpleKriging},
-                 weights::KrigingWeights, z::AbstractVector)
-  γ  = fitted.estimator.γ
-  μ  = fitted.estimator.μ
-  b  = fitted.state.RHS
+function combine(fitted::FittedKriging{<:SimpleKriging}, weights::KrigingWeights, z::AbstractVector)
+  γ = fitted.estimator.γ
+  μ = fitted.estimator.μ
+  b = fitted.state.RHS
   V² = fitted.state.VARTYPE
-  λ  = weights.λ
-  y  = [zᵢ - μ for zᵢ in z]
+  λ = weights.λ
+  y = [zᵢ - μ for zᵢ in z]
 
   σ² = sill(γ)
 
-  μ + sum(λ.*y), σ² - V²(b⋅λ)
+  μ + sum(λ .* y), σ² - V²(b ⋅ λ)
 end

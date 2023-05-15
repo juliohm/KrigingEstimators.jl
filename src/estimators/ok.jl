@@ -22,9 +22,9 @@ nconstraints(::OrdinaryKriging) = 1
 
 function set_constraints_lhs!(::OrdinaryKriging, LHS::AbstractMatrix, domain)
   T = eltype(LHS)
-  LHS[end,:]   .= one(T)
-  LHS[:,end]   .= one(T)
-  LHS[end,end]  = zero(T)
+  LHS[end, :] .= one(T)
+  LHS[:, end] .= one(T)
+  LHS[end, end] = zero(T)
   nothing
 end
 

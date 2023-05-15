@@ -67,7 +67,7 @@ function fit(estimator::KrigingEstimator, data)
 
   # build Kriging system
   LHS = lhs(estimator, D)
-  RHS = Vector{eltype(LHS)}(undef, size(LHS,1))
+  RHS = Vector{eltype(LHS)}(undef, size(LHS, 1))
 
   # factorize LHS
   FLHS = factorize(estimator, LHS)
@@ -93,17 +93,17 @@ function lhs(estimator::KrigingEstimator, domain)
   ncon = nconstraints(estimator)
 
   # pre-allocate memory for LHS
-  u  = first(domain)
+  u = first(domain)
   V² = Variography.result_type(γ, u, u)
-  m  = nobs + ncon
-  G  = Matrix{V²}(undef, m, m)
+  m = nobs + ncon
+  G = Matrix{V²}(undef, m, m)
 
   # set variogram/covariance block
   pairwise!(G, γ, domain)
   if isstationary(γ)
     σ² = sill(γ)
     for j in 1:nobs, i in 1:nobs
-      @inbounds G[i,j] = σ² - G[i,j]
+      @inbounds G[i, j] = σ² - G[i, j]
     end
   end
 
@@ -136,8 +136,7 @@ function set_constraints_lhs! end
 Factorize LHS of Kriging system with appropriate
 factorization method.
 """
-factorize(::KrigingEstimator, LHS) =
-  bunchkaufman(Symmetric(LHS), check=false)
+factorize(::KrigingEstimator, LHS) = bunchkaufman(Symmetric(LHS), check=false)
 
 #-----------------
 # PREDICTION STEP
@@ -151,8 +150,8 @@ Compute mean and variance of variable `var` using the
 """
 function predict(fitted::FittedKriging, var, uₒ)
   data = fitted.state.data
-  ws   = weights(fitted, uₒ)
-  vs   = getproperty(data, var)
+  ws = weights(fitted, uₒ)
+  vs = getproperty(data, var)
   combine(fitted, ws, vs)
 end
 
@@ -182,7 +181,7 @@ function weights(fitted::FittedKriging, uₒ)
   s = fitted.state.LHS \ fitted.state.RHS
 
   λ = view(s, 1:nobs)
-  ν = view(s, nobs+1:length(s))
+  ν = view(s, (nobs + 1):length(s))
 
   KrigingWeights(λ, ν)
 end
@@ -222,26 +221,24 @@ function set_constraints_rhs! end
 Combine `weights` with values `z` to produce mean and variance
 using the appropriate formulas for the `estimator`.
 """
-function combine(fitted::FittedKriging,
-                 weights::KrigingWeights,
-                 z::AbstractVector)
-  γ  = fitted.estimator.γ
-  b  = fitted.state.RHS
+function combine(fitted::FittedKriging, weights::KrigingWeights, z::AbstractVector)
+  γ = fitted.estimator.γ
+  b = fitted.state.RHS
   V² = fitted.state.VARTYPE
-  λ  = weights.λ
-  ν  = weights.ν
+  λ = weights.λ
+  ν = weights.ν
 
   # compute b⋅[λ;ν]
   nobs = length(λ)
   c₁ = view(b, 1:nobs) ⋅ λ
-  c₂ = view(b, nobs+1:length(b)) ⋅ ν
+  c₂ = view(b, (nobs + 1):length(b)) ⋅ ν
   c = c₁ + c₂
 
   if isstationary(γ)
     σ² = sill(γ)
-    sum(λ.*z), σ² - V²(c)
+    sum(λ .* z), σ² - V²(c)
   else
-    sum(λ.*z), V²(c)
+    sum(λ .* z), V²(c)
   end
 end
 
