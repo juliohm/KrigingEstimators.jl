@@ -35,5 +35,5 @@ If you have any questions, please [contact our community](https://juliaearth.git
 [build-img]: https://img.shields.io/github/actions/workflow/status/JuliaEarth/KrigingEstimators.jl/CI.yml?branch=master&style=flat-square
 [build-url]: https://github.com/JuliaEarth/KrigingEstimators.jl/actions
 
-[codecov-img]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl/branch/master/graph/badge.svg
+[codecov-img]: https://img.shields.io/codecov/c/github/JuliaEarth/KrigingEstimators.jl?style=flat-square
 [codecov-url]: https://codecov.io/gh/JuliaEarth/KrigingEstimators.jl
