@@ -27,8 +27,11 @@ export
   OrdinaryKriging,
   UniversalKriging,
   ExternalDriftKriging,
-  fit, predict, status,
-  weights, combine,
+  fit,
+  predict,
+  status,
+  weights,
+  combine,
 
   # UI elements
   kriging_ui

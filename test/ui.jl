@@ -6,6 +6,6 @@
   @test krig isa SimpleKriging
   krig = kriging_ui(grid, GaussianVariogram(), nothing, 2, nothing)
   @test krig isa UniversalKriging
-  krig = kriging_ui(grid, GaussianVariogram(), nothing, nothing, [x->1])
+  krig = kriging_ui(grid, GaussianVariogram(), nothing, nothing, [x -> 1])
   @test krig isa ExternalDriftKriging
 end
