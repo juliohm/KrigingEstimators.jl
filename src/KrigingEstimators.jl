@@ -15,7 +15,6 @@ using Distributions: Normal
 using Unitful
 
 import GeoStatsBase: fit, predict, predictprob, status
-import GeoStatsBase: solve
 
 include("estimators.jl")
 include("ui.jl")

@@ -99,7 +99,7 @@ function lhs(estimator::KrigingEstimator, domain)
   G = Matrix{V²}(undef, m, m)
 
   # set variogram/covariance block
-  pairwise!(G, γ, domain)
+  Variography.pairwise!(G, γ, domain)
   if isstationary(γ)
     σ² = sill(γ)
     for j in 1:nobs, i in 1:nobs
