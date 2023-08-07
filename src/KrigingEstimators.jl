@@ -17,7 +17,6 @@ using Unitful
 import GeoStatsBase: fit, predict, predictprob, status
 
 include("estimators.jl")
-include("ui.jl")
 
 export
   # estimators
@@ -30,9 +29,6 @@ export
   predict,
   status,
   weights,
-  combine,
-
-  # UI elements
-  kriging_ui
+  combine
 
 end
