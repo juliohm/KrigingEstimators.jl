@@ -7,7 +7,7 @@
     UniversalKriging(data, γ, degree)
 
 Universal Kriging with variogram model `γ` and polynomial
-`degree` on a spatial domain of dimension `dim`.
+`degree` on a geospatial domain of dimension `dim`.
 
 Optionally, pass the geospatial `data` to the [`fit`](@ref) function.
 
