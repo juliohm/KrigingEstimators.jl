@@ -25,6 +25,7 @@ export
   OrdinaryKriging,
   UniversalKriging,
   ExternalDriftKriging,
+  variogram,
   fit,
   predict,
   status,

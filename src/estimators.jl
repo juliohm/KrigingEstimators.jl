@@ -10,6 +10,13 @@ A Kriging estimator (e.g. Simple Kriging).
 abstract type KrigingEstimator <: ProbabilisticEstimator end
 
 """
+    variogram(estimator)
+
+Return the underlying variogram model of the `estimator`.
+"""
+variogram(estimator::KrigingEstimator) = estimator.γ
+
+"""
     KrigingState(data, LHS, RHS, VARTYPE)
 
 A Kriging state stores information needed

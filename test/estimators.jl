@@ -2,6 +2,17 @@
   # floating point tolerance
   tol = 100eps()
 
+  # test variogram accessor function
+  γ = GaussianVariogram(sill=1.0, range=1.0, nugget=0.0)
+  simkrig = SimpleKriging(γ, 0.0)
+  ordkrig = OrdinaryKriging(γ)
+  unikrig = UniversalKriging(γ, 1, 3)
+  drikrig = ExternalDriftKriging(γ, [x -> 1.0])
+  @test variogram(simkrig) == γ
+  @test variogram(ordkrig) == γ
+  @test variogram(unikrig) == γ
+  @test variogram(drikrig) == γ
+
   # create some data
   dim = 3
   nobs = 10
