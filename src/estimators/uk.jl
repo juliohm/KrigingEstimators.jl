@@ -32,7 +32,8 @@ end
 
 UniversalKriging(γ, degree, dim) = UniversalKriging{typeof(γ)}(γ, degree, dim)
 
-UniversalKriging(data::AbstractGeoTable, γ, degree) = GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(domain(data))), data)
+UniversalKriging(data::AbstractGeoTable, γ, degree) =
+  GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(domain(data))), data)
 
 function UKexps(degree::Int, dim::Int)
   # multinomial expansion
