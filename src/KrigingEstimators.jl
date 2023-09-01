@@ -5,6 +5,7 @@
 module KrigingEstimators
 
 using Meshes
+using GeoTables
 using GeoStatsBase
 using Variography
 

@@ -32,7 +32,7 @@ end
 
 UniversalKriging(γ, degree, dim) = UniversalKriging{typeof(γ)}(γ, degree, dim)
 
-UniversalKriging(data::Data, γ, degree) = GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(domain(data))), data)
+UniversalKriging(data::AbstractGeoTable, γ, degree) = GeoStatsBase.fit(UniversalKriging(γ, degree, embeddim(domain(data))), data)
 
 function UKexps(degree::Int, dim::Int)
   # multinomial expansion
@@ -70,7 +70,7 @@ end
 function set_constraints_rhs!(fitted::FittedKriging{<:UniversalKriging}, uₒ)
   exponents = fitted.estimator.exponents
   RHS = fitted.state.RHS
-  nobs = nitems(fitted.state.data)
+  nobs = nrow(fitted.state.data)
   nterms = size(exponents, 2)
 
   # set polynomial drift

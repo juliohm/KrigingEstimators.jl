@@ -22,7 +22,7 @@ variogram(estimator::KrigingEstimator) = estimator.γ
 A Kriging state stores information needed
 to perform estimation at any given location.
 """
-mutable struct KrigingState{D<:Data,F<:Factorization,T,V}
+mutable struct KrigingState{D<:AbstractGeoTable,F<:Factorization,T,V}
   data::D
   LHS::F
   RHS::Vector{T}
@@ -180,7 +180,7 @@ Compute the weights λ (and Lagrange multipliers ν) for the
 `estimator` at point or geometry `uₒ`.
 """
 function weights(fitted::FittedKriging, uₒ)
-  nobs = nitems(fitted.state.data)
+  nobs = nrow(fitted.state.data)
 
   set_rhs!(fitted, uₒ)
 
